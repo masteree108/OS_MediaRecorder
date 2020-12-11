@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">DAY19_LittleBirdSound(MediaPlayer+MediaRecorder)</string>
+    <string name="start">Start</string>
+    <string name="stop">STOP</string>
+    <string name="volume_50">Volume : 50 %</string>
+    <string name="record">RECORD</string>
+    <string name="choose">Choose</string>
+    <string name="url_get">URL_GET</string>
+    <string name="get_info">get info</string>
+    <string name="動畫">動畫</string>
 </resources>

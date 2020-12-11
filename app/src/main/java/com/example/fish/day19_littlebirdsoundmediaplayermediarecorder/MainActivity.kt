@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun activityInit() {
+    private fun activityInit() {
         mediaPlayer = MediaPlayer.create(this, R.raw.country_cue_1)
         animator = ObjectAnimator.ofFloat(imageView, "rotation", 0.0f, 360.0f)
         animator.duration = 2000
@@ -72,18 +72,18 @@ class MainActivity : AppCompatActivity() {
         addDirectory()
     }
 
-    fun addDirectory() {
+    private fun addDirectory() {
         val file = File(getExternalFilesDir(DIRECTORY_MUSIC) ,"/aaaaa")
         if (!file.exists()) file.mkdir()
     }
 
-    fun mediaPlayerAndProgressUpdate() {
+    private fun mediaPlayerAndProgressUpdate() {
         mediaPlayer.setOnCompletionListener(mediaPlayerListener)
         this.progressSeekBar.max = mediaPlayer.duration
         this.progressSeekBar.progress = 0
     }
 
-    fun setThread() {
+    private fun setThread() {
         thread = Thread(Runnable {
             if (progressSeekBar.progress < progressSeekBar.max) {
                 progressSeekBar.progress = mediaPlayer.currentPosition
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun getPermission() {
+    private fun getPermission() {
         if (ActivityCompat.checkSelfPermission(
                         this,
                         android.Manifest.permission.RECORD_AUDIO
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    val playListener = View.OnClickListener {
+    private val playListener = View.OnClickListener {
         when (it) {
             startAndPause -> {
                 if (mediaPlayer.isPlaying) {
@@ -152,7 +152,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val seekBarListener = object : SeekBar.OnSeekBarChangeListener {
+    private val seekBarListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             mediaPlayer.setVolume(progress / 100f, progress / 100f)
             textView.text = "Volume : $progress %"
@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val progressSeekBarListener = object : SeekBar.OnSeekBarChangeListener {
+    private val progressSeekBarListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             if (fromUser) mediaPlayer.seekTo(progress)
         }
@@ -180,7 +180,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    val mediaPlayerListener = MediaPlayer.OnCompletionListener {
+    private val mediaPlayerListener = MediaPlayer.OnCompletionListener {
         handler.removeCallbacks(thread)
         mediaPlayer.stop()
         mediaPlayer.prepare()
@@ -189,7 +189,7 @@ class MainActivity : AppCompatActivity() {
         startAndPause.text = "Start"
     }
 
-    val recordListener = View.OnClickListener {
+    private val recordListener = View.OnClickListener {
         it as Button
         val time = Date().time
         when (it.text) {
@@ -230,7 +230,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    val chooseListener = View.OnClickListener {
+    private val chooseListener = View.OnClickListener {
 
         chooseFilePosition = null
         dataList.clear()
@@ -245,7 +245,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        println("*********" + dataList.toString())
+        println("*********$dataList")
 
         val view = LayoutInflater.from(this).inflate(R.layout.choosefile, null)
         view.recyclerView.adapter = adapter
@@ -264,13 +264,14 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    val getListener = View.OnClickListener {
+    private val getListener = View.OnClickListener {
         textInfo.text = "ccc"
         val client = OkHttpClient()
-        val request = Request.Builder()  // 實例化一個 Builder
-            //加上要發送請求的 API 網址
-            //name 為傳入的參數
-            .url("https://140.109.22.214:7777/docs#/")
+        val request = Request.Builder()
+                .url("https://140.109.22.214:7777/api/ping")
+                /*實例化一個 Builder
+                加上要發送請求的 API 網址
+                name 為傳入的參數*/
 //            .url("https://jsonplaceholder.typicode.com/posts")
 //            .url("https://publicobject.com/helloworld.txt")
             //建立 Request
@@ -288,7 +289,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun prepareFile() {
+    private fun prepareFile() {
         val oriUri = Uri.parse("android.resource://com.example.fish.day19_littlebirdsoundmediaplayermediarecorder/raw/country_cue_1.mp3")
         val initFile = File(oriUri.path)
         val file = File(getExternalFilesDir(DIRECTORY_MUSIC), "/aaaaa")
@@ -301,7 +302,7 @@ class MainActivity : AppCompatActivity() {
 //        dataList.add(getFileInfor(mr, initFile))
     }
 
-    fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
+    private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
         val p = "$DIRECTORY_MUSIC/aaaa"
         println("********* ${file.path}")
         println("********* $p")
@@ -312,7 +313,7 @@ class MainActivity : AppCompatActivity() {
         return Data(Uri.fromFile(file), name, time, Color.argb(0, 0, 0, 0))
     }
 
-    fun setChooseFile(uri: Uri) {
+    private fun setChooseFile(uri: Uri) {
         mediaPlayer.release()
         mediaPlayer = MediaPlayer.create(this, uri)
         mediaPlayerAndProgressUpdate()
