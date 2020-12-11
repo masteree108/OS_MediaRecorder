@@ -2,51 +2,33 @@ package com.example.fish.day19_littlebirdsoundmediaplayermediarecorder
 
 import android.animation.ObjectAnimator
 import android.annotation.TargetApi
-import android.app.ActionBar
-import android.app.Activity
-import android.app.Application
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
-import android.content.Intent.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.media.AudioRecord
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
-import android.os.*
-import android.os.Environment.DIRECTORY_ALARMS
-import android.support.v7.app.AppCompatActivity
-import android.os.storage.StorageManager
-import android.provider.DocumentsContract
-import android.provider.MediaStore
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment.DIRECTORY_MUSIC
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.FileProvider
-import android.support.v4.provider.DocumentFile
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.text.TextUtils.split
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.SeekBar
-import com.example.fish.day19_littlebirdsoundmediaplayermediarecorder.R.id.textView
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.choosefile.*
 import kotlinx.android.synthetic.main.choosefile.view.*
-import kotlinx.android.synthetic.main.edit_name.*
 import kotlinx.android.synthetic.main.edit_name.view.*
 import okhttp3.*
 import java.io.File
 import java.io.IOException
-import java.net.URI
 import java.util.*
-import java.util.jar.Manifest
 
 @TargetApi(Build.VERSION_CODES.N)
 class MainActivity : AppCompatActivity() {
@@ -91,7 +73,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addDirectory() {
-        val file = File(Environment.getExternalStorageDirectory().path + "/aaaaa")
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC) ,"/aaaaa")
         if (!file.exists()) file.mkdir()
     }
 
@@ -139,7 +121,7 @@ class MainActivity : AppCompatActivity() {
         when (it) {
             startAndPause -> {
                 if (mediaPlayer.isPlaying) {
-                    startAndPause.setText("START")
+                    startAndPause.text = "START"
                     animator.pause()
                     mediaPlayer.pause()
                     handler.removeCallbacks(thread)
@@ -151,8 +133,8 @@ class MainActivity : AppCompatActivity() {
                         println("aaaaaa $animator")
 
                     }
-                    startAndPause.setText("PAUSE")
-                    startAndPause.setText("PAUSE")
+                    startAndPause.text = "PAUSE"
+                    startAndPause.text = "PAUSE"
                     mediaPlayer.start()
                     handler.postDelayed(thread, 200)
                 }
@@ -212,7 +194,7 @@ class MainActivity : AppCompatActivity() {
         val time = Date().time
         when (it.text) {
             "RECORD" -> {
-                oriFile = File(Environment.getExternalStorageDirectory(), "aaaaa/new.mp4")
+                oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), "aaaaa/new.mp4")
                 myUri = FileProvider.getUriForFile(this, "day19", oriFile)
                 mediaRecorder = MediaRecorder()
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -233,7 +215,7 @@ class MainActivity : AppCompatActivity() {
                         .setView(view)
                         .setTitle("命名錄音")
                         .setPositiveButton("OK") { dialog, which ->
-                            val newFile = File(Environment.getExternalStorageDirectory(), "aaaaa/${view.editText.text}.mp4")
+                            val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), "aaaaa/${view.editText.text}.mp4")
                             oriFile.renameTo(newFile)
                         }
                         .setNegativeButton("cancel"){dialog, which ->
@@ -309,24 +291,24 @@ class MainActivity : AppCompatActivity() {
     fun prepareFile() {
         val oriUri = Uri.parse("android.resource://com.example.fish.day19_littlebirdsoundmediaplayermediarecorder/raw/country_cue_1.mp3")
         val initFile = File(oriUri.path)
-        val file = File(Environment.getExternalStorageDirectory(), "/aaaaa")
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), "/aaaaa")
         val fileList = file.listFiles()
         val mr = MediaMetadataRetriever()
 
-        for (i in 0 until fileList.size) {
-            dataList.add(getFileInfor(mr, fileList[i]))
+        for (element in fileList) {
+            dataList.add(getFileInfor(mr, element))
         }
 //        dataList.add(getFileInfor(mr, initFile))
     }
 
     fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
-        val p = Environment.getExternalStorageDirectory().path + "/aaaaa/"
+        val p = "$DIRECTORY_MUSIC/aaaa"
         println("********* ${file.path}")
         println("********* $p")
         mr.setDataSource(file.path)
-        val duration = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION).toLong()
+        val duration = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
         val name = file.name
-        val time = " ${duration / 6000}:${duration % 6000 / 1000}"
+        val time: String = """ ${duration?.div(6000)}:${(duration?.rem(6000) )?.div(1000)}"""
         return Data(Uri.fromFile(file), name, time, Color.argb(0, 0, 0, 0))
     }
 
