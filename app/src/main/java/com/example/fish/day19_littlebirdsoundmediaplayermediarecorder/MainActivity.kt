@@ -11,10 +11,7 @@ import android.content.Intent
 import android.content.Intent.*
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.media.AudioRecord
-import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
-import android.media.MediaRecorder
+import android.media.*
 import android.net.Uri
 import android.os.*
 import android.os.Environment.DIRECTORY_ALARMS
@@ -68,7 +65,7 @@ class MainActivity : AppCompatActivity() {
 
         activityInit()
 //        val  sd=Environment.getExternalStorageDirectory();
-//        val path=sd.getPath()+"/aaaaa"
+//        val path=sd.getPath()+"/recaudio"
 
     }
 
@@ -91,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addDirectory() {
-        val file = File(Environment.getExternalStorageDirectory().path + "/aaaaa")
+        val file = File(Environment.getExternalStorageDirectory().path + "/recaudio")
         if (!file.exists()) file.mkdir()
     }
 
@@ -148,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                     else {
                         animator.repeatCount = -1
                         animator.start()
-                        println("aaaaaa $animator")
+                        println("recaudio $animator")
 
                     }
                     startAndPause.setText("PAUSE")
@@ -212,12 +209,15 @@ class MainActivity : AppCompatActivity() {
         val time = Date().time
         when (it.text) {
             "RECORD" -> {
-                oriFile = File(Environment.getExternalStorageDirectory(), "aaaaa/new.mp4")
+                oriFile = File(Environment.getExternalStorageDirectory(), "recaudio/new.wav")
                 myUri = FileProvider.getUriForFile(this, "day19", oriFile)
                 mediaRecorder = MediaRecorder()
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
+                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                mediaRecorder.setAudioChannels(1);
+                mediaRecorder.setAudioEncodingBitRate(128000);
+                mediaRecorder.setAudioSamplingRate(48000);
                 mediaRecorder.setOutputFile(oriFile.absolutePath)
                 mediaRecorder.prepare()
                 mediaRecorder.start()
@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity() {
                         .setView(view)
                         .setTitle("命名錄音")
                         .setPositiveButton("OK") { dialog, which ->
-                            val newFile = File(Environment.getExternalStorageDirectory(), "aaaaa/${view.editText.text}.mp4")
+                            val newFile = File(Environment.getExternalStorageDirectory(), "recaudio/${view.editText.text}.wav")
                             oriFile.renameTo(newFile)
                         }
                         .setNegativeButton("cancel"){dialog, which ->
@@ -309,7 +309,7 @@ class MainActivity : AppCompatActivity() {
     fun prepareFile() {
         val oriUri = Uri.parse("android.resource://com.example.fish.day19_littlebirdsoundmediaplayermediarecorder/raw/country_cue_1.mp3")
         val initFile = File(oriUri.path)
-        val file = File(Environment.getExternalStorageDirectory(), "/aaaaa")
+        val file = File(Environment.getExternalStorageDirectory(), "/recaudio")
         val fileList = file.listFiles()
         val mr = MediaMetadataRetriever()
 
@@ -320,7 +320,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
-        val p = Environment.getExternalStorageDirectory().path + "/aaaaa/"
+        val p = Environment.getExternalStorageDirectory().path + "/recaudio/"
         println("********* ${file.path}")
         println("********* $p")
         mr.setDataSource(file.path)
