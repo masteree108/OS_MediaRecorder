@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     val dataList = mutableListOf<Data>()
     lateinit var chooseFileUri: Uri
     var chooseFilePosition: Int? = null
-
+    val path_name = "/recAudio"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         activityInit()
 //        val  sd=Environment.getExternalStorageDirectory();
-//        val path=sd.getPath()+"/aaaaa"
+//        val path=sd.getPath()+ path_name
 
     }
 
@@ -82,8 +82,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addDirectory() {
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC) ,"/aaaaa")
-        if (!file.exists()) file.mkdir()
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC) ,path_name)
+        if (!file.exists()) {
+            file.mkdir()
+            println(file.absolutePath + path_name + " is not exists")
+        } else {
+            println(file.absolutePath + path_name + " existed")
+        }
     }
 
     private fun mediaPlayerAndProgressUpdate() {
@@ -203,7 +208,7 @@ class MainActivity : AppCompatActivity() {
         val time = Date().time
         when (it.text) {
             "RECORD" -> {
-                oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), "aaaaa/new.mp4")
+                oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.mp4")
                 myUri = FileProvider.getUriForFile(this, "day19", oriFile)
                 mediaRecorder = MediaRecorder()
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -224,7 +229,7 @@ class MainActivity : AppCompatActivity() {
                         .setView(view)
                         .setTitle("命名錄音")
                         .setPositiveButton("OK") { dialog, which ->
-                            val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), "aaaaa/${view.editText.text}.mp4")
+                            val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name+"/${view.editText.text}.mp4")
                             oriFile.renameTo(newFile)
                         }
                         .setNegativeButton("cancel"){dialog, which ->
@@ -274,7 +279,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val getListener = View.OnClickListener {
-//        textInfo.text="button"
+//        textInfo.text="01.01"
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
         val request = Request.Builder()
             .url("https://140.109.22.214:7777/api/ping/")
@@ -298,7 +303,7 @@ class MainActivity : AppCompatActivity() {
     private fun prepareFile() {
 //        val oriUri = Uri.parse("android.resource://com.example.fish.day19_littlebirdsoundmediaplayermediarecorder/raw/country_cue_1.mp3")
 //        val initFile = File(oriUri.path)
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), "/aaaaa")
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
         Log.d("path", file.toString()) /*可以看logcat*/
         val fileList = file.listFiles()
         val mr = MediaMetadataRetriever()
@@ -310,7 +315,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
-        val p = "$DIRECTORY_MUSIC/aaaa"
+        val p = "$DIRECTORY_MUSIC/"+ path_name
 //        println("********* ${file.path}")
 //        println("********* $p")
         mr.setDataSource(file.path)
