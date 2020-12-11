@@ -25,10 +25,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.choosefile.view.*
 import kotlinx.android.synthetic.main.edit_name.view.*
-import okhttp3.*
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.result.Result
 import java.io.File
-import java.io.IOException
+import android.util.Log
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.fuel.core.Method
+import java.security.cert.X509Certificate
 import java.util.*
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 @TargetApi(Build.VERSION_CODES.N)
 class MainActivity : AppCompatActivity() {
@@ -265,28 +273,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val getListener = View.OnClickListener {
-        textInfo.text = "ccc"
-        val client = OkHttpClient()
-        val request = Request.Builder()
-                .url("https://140.109.22.214:7777/api/ping")
-                /*實例化一個 Builder
-                加上要發送請求的 API 網址
-                name 為傳入的參數*/
-//            .url("https://jsonplaceholder.typicode.com/posts")
-//            .url("https://publicobject.com/helloworld.txt")
-            //建立 Request
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call:Call, e: IOException) {
-                runOnUiThread { textInfo.text = "error1 "+ e.toString()}
-            }
+//        textInfo.text="button"
+        val (request, response, result) = manager.request(Method.GET,"http://140.109.22.214:7777/api/ping/")
+            .header("Accept", "application/json")
+            .response()
+        assert(response.statusCode != 200)
 
-            @Throws(IOException::class)
-            override fun onResponse(call:Call, response: Response) {
-                val resStr = response.body?.string()
-                runOnUiThread { textInfo.text = "good "+ resStr }
+        Log.d("req", request.toString())
+        Log.d("res", response.toString())
+
+        when (result) {
+            is Result.Failure -> {
+                val ex = result.getException()
+                println(ex)
             }
-        })
+            is Result.Success -> {
+                val data = result.get()
+                Log.d("info", data.toString())
+                textInfo.text = "get"
+            }
+        }
     }
 
     private fun prepareFile() {
@@ -317,6 +323,19 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer.release()
         mediaPlayer = MediaPlayer.create(this, uri)
         mediaPlayerAndProgressUpdate()
+    }
+    val manager : FuelManager = FuelManager().apply {
+        val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+            override fun getAcceptedIssuers(): Array<X509Certificate>? = null
+            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) = Unit
+            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) = Unit
+        })
+
+        socketFactory = SSLContext.getInstance("SSL").apply {
+            init(null, trustAllCerts, java.security.SecureRandom())
+        }.socketFactory
+
+        hostnameVerifier = HostnameVerifier { _, _ -> true }
     }
 
 }

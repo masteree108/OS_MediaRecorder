@@ -63,6 +63,8 @@
         android:layout_height="75dp"
         android:layout_marginBottom="32dp"
         android:contentDescription="@string/動畫"
+        android:rotationX="48"
+        android:rotationY="39"
         app:layout_constraintBottom_toTopOf="@+id/progressSeekBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
