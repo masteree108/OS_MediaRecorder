@@ -1,11 +1,11 @@
-package com.example.fish.day19_littlebirdsoundmediaplayermediarecorder
+package com.OS_finial_term_APP
 
 import android.content.Context
-import android.graphics.Color
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+//import com.OS_final_term_APP.R
 import kotlinx.android.synthetic.main.file.view.*
 
 class Adapter(val context: Context, val list: List<Data>) : RecyclerView.Adapter<Adapter.ViewHolder>() {
@@ -21,7 +21,8 @@ class Adapter(val context: Context, val list: List<Data>) : RecyclerView.Adapter
     }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, type: Int): ViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.file, viewGroup, false)
+        val view = LayoutInflater.from(context).inflate(
+            R.layout.file, viewGroup, false)
         return ViewHolder(view)
     }
 

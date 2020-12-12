@@ -1,4 +1,4 @@
-package com.example.fish.day19_littlebirdsoundmediaplayermediarecorder
+package com.OS_finial_term_APP
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("com.example.fish.day19_littlebirdsoundmediaplayermediarecorder", appContext.packageName)
+        assertEquals("OS_finial_term_APP", appContext.packageName)
     }
 }

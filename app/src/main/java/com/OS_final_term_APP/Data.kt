@@ -1,4 +1,4 @@
-package com.example.fish.day19_littlebirdsoundmediaplayermediarecorder
+package com.OS_finial_term_APP
 
 import android.net.Uri
 
