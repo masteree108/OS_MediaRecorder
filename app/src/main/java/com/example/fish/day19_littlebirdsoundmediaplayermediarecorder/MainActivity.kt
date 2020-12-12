@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.annotation.TargetApi
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.media.AudioFormat
 import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.media.MediaRecorder
@@ -208,12 +209,16 @@ class MainActivity : AppCompatActivity() {
         val time = Date().time
         when (it.text) {
             "RECORD" -> {
-                oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.mp4")
+                oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.wav")
                 myUri = FileProvider.getUriForFile(this, "day19", oriFile)
                 mediaRecorder = MediaRecorder()
                 mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-                mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+                mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
+                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                mediaRecorder.setAudioChannels(1);
+                mediaRecorder.setAudioEncodingBitRate(128000);
+                mediaRecorder.setAudioSamplingRate(48000);
+
                 mediaRecorder.setOutputFile(oriFile.absolutePath)
                 mediaRecorder.prepare()
                 mediaRecorder.start()
@@ -229,7 +234,7 @@ class MainActivity : AppCompatActivity() {
                         .setView(view)
                         .setTitle("命名錄音")
                         .setPositiveButton("OK") { dialog, which ->
-                            val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name+"/${view.editText.text}.mp4")
+                            val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name+"/${view.editText.text}.wav")
                             oriFile.renameTo(newFile)
                         }
                         .setNegativeButton("cancel"){dialog, which ->
