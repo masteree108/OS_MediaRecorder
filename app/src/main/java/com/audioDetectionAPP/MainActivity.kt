@@ -59,19 +59,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun activityInit() {
+        connect_to_server()
         mediaPlayer = MediaPlayer.create(this, R.raw.country_cue_1)
         animator = ObjectAnimator.ofFloat(imageView, "rotation", 0.0f, 360.0f)
         animator.duration = 2000
         animator.interpolator = LinearInterpolator()
         mediaPlayerAndProgressUpdate()
-
         startAndPauseImageButton.setOnClickListener(playListener)
         ImageButtonstop.setOnClickListener(playListener)
         seekBar.setOnSeekBarChangeListener(seekBarListener)
         progressSeekBar.setOnSeekBarChangeListener(progressSeekBarListener)
         toggleButtonRecord.setOnClickListener(recordListener)
         ImageButtonChoose.setOnClickListener(chooseListener)
-        url_get.setOnClickListener(getListener)
+//        url_get.setOnClickListener(getListener)
 //        startAndPause.setOnClickListener(playListener)
 //        ImageButtonRecord.setOnClickListener(recordListener)
 //        choose.setOnClickListener(chooseListener)
@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addDirectory() {
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC) ,path_name)
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
         if (!file.exists()) {
             file.mkdir()
             println(file.absolutePath + path_name + " is not exists")
@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
         it as ToggleButton
         Log.d("toggle", it.isChecked.toString())
         if (it.isChecked) {
-            oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.wav")
+            oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.wav")
             myUri = FileProvider.getUriForFile(this, "day19", oriFile)
             mediaRecorder = MediaRecorder()
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder.setOutputFile(oriFile.absolutePath)
             mediaRecorder.prepare()
             mediaRecorder.start()
-        }else{
+        } else {
             mediaRecorder.stop()
             mediaRecorder.release()
 
@@ -233,10 +233,10 @@ class MainActivity : AppCompatActivity() {
                     .setView(view)
                     .setTitle("命名錄音")
                     .setPositiveButton("OK") { dialog, which ->
-                        val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name+"/${view.editText.text}.wav")
+                        val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.wav")
                         oriFile.renameTo(newFile)
                     }
-                    .setNegativeButton("cancel"){dialog, which ->
+                    .setNegativeButton("cancel") { dialog, which ->
                         oriFile.delete()
                     }
                     .create()
@@ -278,26 +278,23 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private val getListener = View.OnClickListener {
-//        textInfo.text="01.01"
+    private fun connect_to_server() {
+        connectStatus.text = "連線狀態：連線中..."
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
         val request = Request.Builder()
-            .url("https://140.109.22.214:7777/api/ping/")
-            .build()
+                .url("https://140.109.22.214:7777/api/ping/")
+                .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread { textInfo.text = e.message }
+                runOnUiThread { connectStatus.text = "連線狀態：連線失敗" }
             }
 
             @Throws(IOException::class)
             override fun onResponse(call: Call, response: Response) {
                 val resStr = response.body?.string()
-                runOnUiThread { textInfo.text = resStr }
+                runOnUiThread { connectStatus.text = "連線狀態：連線成功" }
             }
         })
-//        "https://140.109.22.214:7777/api/ping/"
-
-
     }
 
     private fun prepareFile() {
@@ -315,11 +312,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
-        val p = "$DIRECTORY_MUSIC/"+ path_name
+        val p = "$DIRECTORY_MUSIC/" + path_name
         mr.setDataSource(file.path)
         val duration = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
         val name = file.name
-        val time: String = """ ${duration?.div(6000)}:${(duration?.rem(6000) )?.div(1000)}"""
+        val time: String = """ ${duration?.div(6000)}:${(duration?.rem(6000))?.div(1000)}"""
         return Data(Uri.fromFile(file), name, time, Color.argb(0, 0, 0, 0))
     }
 
@@ -328,7 +325,6 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer = MediaPlayer.create(this, uri)
         mediaPlayerAndProgressUpdate()
     }
-
 
 
 }
