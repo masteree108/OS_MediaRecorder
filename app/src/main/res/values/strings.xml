@@ -1,11 +1,11 @@
 <resources>
     <string name="app_name">OS_final_term_APP</string>
     <string name="start">Start</string>
-    <string name="stop">STOP</string>
+    <string name="stop">Stop</string>
     <string name="volume_50">Volume : 50 %</string>
-    <string name="record">RECORD</string>
+    <string name="record">Record</string>
     <string name="choose">Choose</string>
-    <string name="url_get">URL_GET</string>
-    <string name="get_info">get info</string>
+    <string name="get">Get</string>
+    <string name="get_response">Get Response</string>
     <string name="動畫">動畫</string>
 </resources>

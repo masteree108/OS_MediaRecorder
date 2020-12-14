@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
                     else {
                         animator.repeatCount = -1
                         animator.start()
-                        println("aaaaaa $animator")
+//                        println("aaaaaa $animator")
 
                     }
                     startAndPause.text = "PAUSE"
@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity() {
         it as Button
         val time = Date().time
         when (it.text) {
-            "RECORD" -> {
+            "Record" -> {
                 oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.wav")
                 myUri = FileProvider.getUriForFile(this, "day19", oriFile)
                 mediaRecorder = MediaRecorder()
@@ -222,10 +222,10 @@ class MainActivity : AppCompatActivity() {
                 mediaRecorder.setOutputFile(oriFile.absolutePath)
                 mediaRecorder.prepare()
                 mediaRecorder.start()
-                it.text = "STOP"
+                it.text = "Stop"
             }
 
-            "STOP" -> {
+            "Stop" -> {
                 mediaRecorder.stop()
                 mediaRecorder.release()
 
@@ -243,7 +243,7 @@ class MainActivity : AppCompatActivity() {
                         .create()
                         .show()
 
-                it.text = "RECORD"
+                it.text = "Record"
             }
         }
 
@@ -264,7 +264,6 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        println("*********$dataList")
 
         val view = LayoutInflater.from(this).inflate(R.layout.choosefile, null)
         view.recyclerView.adapter = adapter
@@ -321,8 +320,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
         val p = "$DIRECTORY_MUSIC/"+ path_name
-//        println("********* ${file.path}")
-//        println("********* $p")
         mr.setDataSource(file.path)
         val duration = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
         val name = file.name
