@@ -1,4 +1,4 @@
-package com.OS_finial_term_APP
+package com.audioDetectionAPP
 
 import android.animation.ObjectAnimator
 import android.annotation.TargetApi

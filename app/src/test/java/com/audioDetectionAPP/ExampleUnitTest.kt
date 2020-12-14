@@ -1,4 +1,4 @@
-package com.OS_finial_term_APP
+package com.audioDetectionAPP
 
 import org.junit.Test
 

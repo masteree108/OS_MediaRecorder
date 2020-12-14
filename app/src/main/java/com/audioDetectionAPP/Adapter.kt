@@ -1,11 +1,12 @@
-package com.OS_finial_term_APP
+package com.audioDetectionAPP
 
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-//import com.OS_final_term_APP.R
+import com.audioDetectionAPP.R
+
 import kotlinx.android.synthetic.main.file.view.*
 
 class Adapter(val context: Context, val list: List<Data>) : RecyclerView.Adapter<Adapter.ViewHolder>() {

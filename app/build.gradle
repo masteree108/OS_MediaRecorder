@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 30
     defaultConfig {
-        applicationId "com.example.fish.day19_littlebirdsoundmediaplayermediarecorder"
+        applicationId "com.audioDetectionAPP"
         minSdkVersion 26
         targetSdkVersion 30
         versionCode 1

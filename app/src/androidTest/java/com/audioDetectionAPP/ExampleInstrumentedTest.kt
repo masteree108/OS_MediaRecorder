@@ -1,4 +1,4 @@
-package com.OS_finial_term_APP
+package com.audioDetectionAPP
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("OS_finial_term_APP", appContext.packageName)
+        assertEquals("audioDetectionAPP", appContext.packageName)
     }
 }
