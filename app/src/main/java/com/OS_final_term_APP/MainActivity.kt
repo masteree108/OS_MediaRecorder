@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         when (it) {
             startAndPause -> {
                 if (mediaPlayer.isPlaying) {
-                    startAndPause.text = "START"
+                    startAndPause.text = "Play"
                     animator.pause()
                     mediaPlayer.pause()
                     handler.removeCallbacks(thread)
@@ -148,8 +148,7 @@ class MainActivity : AppCompatActivity() {
 //                        println("aaaaaa $animator")
 
                     }
-                    startAndPause.text = "PAUSE"
-                    startAndPause.text = "PAUSE"
+                    startAndPause.text = "Pause"
                     mediaPlayer.start()
                     handler.postDelayed(thread, 200)
                 }
@@ -162,7 +161,7 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer.prepare()
                 progressSeekBar.progress = 0
 //                mediaPlayer.reset()
-                startAndPause.setText("START")
+                startAndPause.setText("Play")
             }
         }
     }
@@ -201,7 +200,7 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer.prepare()
         animator.end()
         progressSeekBar.progress = 0
-        startAndPause.text = "Start"
+        startAndPause.text = "Play"
     }
 
     private val recordListener = View.OnClickListener {
