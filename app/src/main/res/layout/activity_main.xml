@@ -6,116 +6,60 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="449dp" />
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_marginTop="32dp"
+        android:contentDescription="@string/動畫"
+        android:rotation="-15"
+        android:rotationX="22"
+        android:rotationY="-20"
+        app:layout_constraintEnd_toEndOf="@+id/textInfo"
+        app:layout_constraintStart_toStartOf="@+id/textInfo"
+        app:layout_constraintTop_toBottomOf="@+id/textInfo"
+        app:srcCompat="@mipmap/ic_launcher_round" />
 
-    <Button
-        android:id="@+id/stop"
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="48dp"
-        android:background="@drawable/btn_bg"
         android:fontFamily="@font/raleway_semibold"
-        android:text="@string/stop"
+        android:text="@string/volume_50"
         android:textAllCaps="false"
-        android:textColor="@color/mainBackground"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/record" />
+        app:layout_constraintHorizontal_bias="0.276"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressSeekBar"
+        tools:ignore="MissingConstraints" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:progress="50"
+        app:layout_constraintEnd_toEndOf="@+id/progressSeekBar"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="@+id/progressSeekBar"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <SeekBar
         android:id="@+id/progressSeekBar"
         android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/imageView"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/raleway_semibold"
-        android:text="@string/volume_50"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.278"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressSeekBar"
-        tools:ignore="MissingConstraints" />
-
-    <Button
-        android:id="@+id/choose"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/btn_bg"
-        android:fontFamily="@font/raleway_semibold"
-        android:text="@string/choose"
-        android:textAllCaps="false"
-        android:textColor="@color/mainBackground"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/record"
-        app:layout_constraintVertical_bias="0.0"
-        tools:ignore="MissingConstraints" />
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:layout_marginTop="64dp"
-        android:contentDescription="@string/動畫"
-        android:rotation="-15"
-        android:rotationX="22"
-        android:rotationY="-20"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/ic_launcher_round" />
-
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="230dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:progress="50"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-    <Button
-        android:id="@+id/record"
-        android:layout_width="82dp"
-        android:layout_height="49dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/btn_bg"
-        android:fontFamily="@font/raleway_semibold"
-        android:text="@string/record"
-        android:textAllCaps="false"
-        android:textColor="@color/mainBackground"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
 
     <Button
         android:id="@+id/url_get"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="64dp"
         android:background="@drawable/btn_bg"
         android:fontFamily="@font/raleway_semibold"
         android:paddingStart="32dp"
@@ -123,16 +67,16 @@
         android:text="@string/get"
         android:textAllCaps="false"
         android:textColor="@color/mainBackground"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInfo" />
+        app:layout_constraintEnd_toEndOf="@+id/ImageButtonChoose"
+        app:layout_constraintHorizontal_bias="0.485"
+        app:layout_constraintStart_toStartOf="@+id/startAndPauseImageButton"
+        app:layout_constraintTop_toBottomOf="@+id/ImageButtonstop" />
 
     <TextView
         android:id="@+id/textInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="64dp"
         android:fontFamily="@font/raleway_semibold"
         android:text="@string/get_response"
         android:textAllCaps="false"
@@ -140,22 +84,77 @@
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/startAndPause"
-        android:layout_width="84dp"
+
+    <ToggleButton
+        android:id="@+id/toggleButtonRecord"
+        android:layout_width="44dp"
         android:layout_height="46dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/btn_bg"
-        android:fontFamily="@font/raleway_semibold"
-        android:text="@string/start"
-        android:textAllCaps="false"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/record_boutton"
+
+        android:checked="false"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:text=""
+        android:textOff=""
+        android:textOn=""
+        app:layout_constraintEnd_toStartOf="@+id/ImageButtonChoose"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/ImageButtonstop"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        tools:ignore="MissingConstraints" />
+
+    <ImageButton
+        android:id="@+id/ImageButtonChoose"
+        android:layout_width="45dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/round_button_bg_white"
+        android:contentDescription="TODO"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
         android:textColor="@color/mainBackground"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline"
-        app:layout_constraintEnd_toStartOf="@+id/stop"
-        app:layout_constraintStart_toEndOf="@+id/choose"
-        app:layout_constraintTop_toBottomOf="@+id/record"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintEnd_toEndOf="@+id/seekBar"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/toggleButtonRecord"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:srcCompat="@drawable/ic_baseline_folder_btn"
+        tools:ignore="MissingConstraints" />
+
+    <ImageButton
+        android:id="@+id/startAndPauseImageButton"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/round_button_bg"
+        android:contentDescription="TODO"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:textColor="@color/mainBackground"
+        app:layout_constraintEnd_toStartOf="@+id/ImageButtonstop"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="@+id/seekBar"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:srcCompat="@drawable/ic_baseline_play_btn"
+        tools:ignore="MissingConstraints" />
+
+    <ImageButton
+        android:id="@+id/ImageButtonstop"
+        android:layout_width="45dp"
+        android:layout_height="47dp"
+        android:layout_marginTop="64dp"
+        android:background="@drawable/round_button_bg"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        android:textColor="@color/mainBackground"
+        app:layout_constraintEnd_toStartOf="@+id/toggleButtonRecord"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/startAndPauseImageButton"
+        app:layout_constraintTop_toBottomOf="@+id/seekBar"
+        app:srcCompat="@drawable/ic_baseline_stop_btn"
+        tools:ignore="MissingConstraints" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

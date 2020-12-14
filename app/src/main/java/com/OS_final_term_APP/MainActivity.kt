@@ -17,7 +17,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.LinearInterpolator
-import android.widget.Button
+import android.widget.ToggleButton
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -31,13 +31,9 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
 import okhttp3.Response
-//import com.github.kittinunf.fuel.httpGet
-//import com.github.kittinunf.result.Result
 import java.io.File
 import java.io.IOException
-//import com.github.kittinunf.fuel.core.FuelManager
-//import com.github.kittinunf.fuel.core.Method
-import java.util.*
+
 
 @TargetApi(Build.VERSION_CODES.N)
 class MainActivity : AppCompatActivity() {
@@ -56,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         activityInit()
 //        val  sd=Environment.getExternalStorageDirectory();
 //        val path=sd.getPath()+ path_name
@@ -69,13 +64,18 @@ class MainActivity : AppCompatActivity() {
         animator.duration = 2000
         animator.interpolator = LinearInterpolator()
         mediaPlayerAndProgressUpdate()
-        startAndPause.setOnClickListener(playListener)
-        stop.setOnClickListener(playListener)
+
+        startAndPauseImageButton.setOnClickListener(playListener)
+        ImageButtonstop.setOnClickListener(playListener)
         seekBar.setOnSeekBarChangeListener(seekBarListener)
         progressSeekBar.setOnSeekBarChangeListener(progressSeekBarListener)
-        record.setOnClickListener(recordListener)
-        choose.setOnClickListener(chooseListener)
+        toggleButtonRecord.setOnClickListener(recordListener)
+        ImageButtonChoose.setOnClickListener(chooseListener)
         url_get.setOnClickListener(getListener)
+//        startAndPause.setOnClickListener(playListener)
+//        ImageButtonRecord.setOnClickListener(recordListener)
+//        choose.setOnClickListener(chooseListener)
+//        record.setOnClickListener(recordListener)
         setThread()
         getPermission()
         addDirectory()
@@ -134,9 +134,10 @@ class MainActivity : AppCompatActivity() {
 
     private val playListener = View.OnClickListener {
         when (it) {
-            startAndPause -> {
+            startAndPauseImageButton -> {
                 if (mediaPlayer.isPlaying) {
-                    startAndPause.text = "Play"
+//                    startAndPause.text = "Play"
+                    startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_play_btn)
                     animator.pause()
                     mediaPlayer.pause()
                     handler.removeCallbacks(thread)
@@ -148,20 +149,22 @@ class MainActivity : AppCompatActivity() {
 //                        println("aaaaaa $animator")
 
                     }
-                    startAndPause.text = "Pause"
+//                    startAndPause.text = "Pause"
+                    startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_pause_btn)
                     mediaPlayer.start()
                     handler.postDelayed(thread, 200)
                 }
             }
 
-            stop -> {
+            ImageButtonstop -> {
                 handler.removeCallbacks(thread)
                 animator.end()
                 mediaPlayer.stop()
                 mediaPlayer.prepare()
                 progressSeekBar.progress = 0
 //                mediaPlayer.reset()
-                startAndPause.setText("Play")
+//                startAndPause.setText("Play")
+                startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_play_btn)
             }
         }
     }
@@ -199,53 +202,47 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer.stop()
         mediaPlayer.prepare()
         animator.end()
-        progressSeekBar.progress = 0
-        startAndPause.text = "Play"
+//        progressSeekBar.progress = 0
+//        startAndPause.text = "Play"
+        startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_play_btn)
     }
 
     private val recordListener = View.OnClickListener {
-        it as Button
-        val time = Date().time
-        when (it.text) {
-            "Record" -> {
-                oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.wav")
-                myUri = FileProvider.getUriForFile(this, "day19", oriFile)
-                mediaRecorder = MediaRecorder()
-                mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-                mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
-                mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-                mediaRecorder.setAudioChannels(1);
-                mediaRecorder.setAudioEncodingBitRate(128000);
-                mediaRecorder.setAudioSamplingRate(48000);
+        it as ToggleButton
+        Log.d("toggle", it.isChecked.toString())
+        if (it.isChecked) {
+            oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name +"/new.wav")
+            myUri = FileProvider.getUriForFile(this, "day19", oriFile)
+            mediaRecorder = MediaRecorder()
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
+            mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mediaRecorder.setAudioChannels(1);
+            mediaRecorder.setAudioEncodingBitRate(128000);
+            mediaRecorder.setAudioSamplingRate(48000);
 
-                mediaRecorder.setOutputFile(oriFile.absolutePath)
-                mediaRecorder.prepare()
-                mediaRecorder.start()
-                it.text = "Stop"
-            }
+            mediaRecorder.setOutputFile(oriFile.absolutePath)
+            mediaRecorder.prepare()
+            mediaRecorder.start()
+        }else{
+            mediaRecorder.stop()
+            mediaRecorder.release()
 
-            "Stop" -> {
-                mediaRecorder.stop()
-                mediaRecorder.release()
-
-                val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
-                AlertDialog.Builder(this)
-                        .setView(view)
-                        .setTitle("命名錄音")
-                        .setPositiveButton("OK") { dialog, which ->
-                            val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name+"/${view.editText.text}.wav")
-                            oriFile.renameTo(newFile)
-                        }
-                        .setNegativeButton("cancel"){dialog, which ->
-                            oriFile.delete()
-                        }
-                        .create()
-                        .show()
-
-                it.text = "Record"
-            }
+            val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
+            AlertDialog.Builder(this)
+                    .setView(view)
+                    .setTitle("命名錄音")
+                    .setPositiveButton("OK") { dialog, which ->
+                        val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name+"/${view.editText.text}.wav")
+                        oriFile.renameTo(newFile)
+                    }
+                    .setNegativeButton("cancel"){dialog, which ->
+                        oriFile.delete()
+                    }
+                    .create()
+                    .show()
         }
-
+//
     }
 
     private val chooseListener = View.OnClickListener {
