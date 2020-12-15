@@ -9,4 +9,8 @@
     <string name="get">Get</string>
     <string name="get_response">Get Response</string>
     <string name="動畫">動畫</string>
+    <string name="connect_status">連線狀態：</string>
+    <string name="contentDescription_Stop">停止播放</string>
+    <string name="contentDescription_StartAndPause">播放與暫停</string>
+    <string name="contentDescription_Choose">選擇資料</string>
 </resources>

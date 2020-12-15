@@ -65,11 +65,11 @@ class MainActivity : AppCompatActivity() {
         animator.duration = 2000
         animator.interpolator = LinearInterpolator()
         mediaPlayerAndProgressUpdate()
-        startAndPauseImageButton.setOnClickListener(playListener)
-        ImageButtonstop.setOnClickListener(playListener)
+        ImageButtonStartAndPause.setOnClickListener(playListener)
+        ImageButtonStop.setOnClickListener(playListener)
         seekBar.setOnSeekBarChangeListener(seekBarListener)
         progressSeekBar.setOnSeekBarChangeListener(progressSeekBarListener)
-        toggleButtonRecord.setOnClickListener(recordListener)
+        ToggleButtonRecord.setOnClickListener(recordListener)
         ImageButtonChoose.setOnClickListener(chooseListener)
 //        url_get.setOnClickListener(getListener)
 //        startAndPause.setOnClickListener(playListener)
@@ -134,10 +134,10 @@ class MainActivity : AppCompatActivity() {
 
     private val playListener = View.OnClickListener {
         when (it) {
-            startAndPauseImageButton -> {
+            ImageButtonStartAndPause -> {
                 if (mediaPlayer.isPlaying) {
 //                    startAndPause.text = "Play"
-                    startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_play_btn)
+                    ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_play_btn)
                     animator.pause()
                     mediaPlayer.pause()
                     handler.removeCallbacks(thread)
@@ -150,13 +150,13 @@ class MainActivity : AppCompatActivity() {
 
                     }
 //                    startAndPause.text = "Pause"
-                    startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_pause_btn)
+                    ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_pause_btn)
                     mediaPlayer.start()
                     handler.postDelayed(thread, 200)
                 }
             }
 
-            ImageButtonstop -> {
+            ImageButtonStop -> {
                 handler.removeCallbacks(thread)
                 animator.end()
                 mediaPlayer.stop()
@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
                 progressSeekBar.progress = 0
 //                mediaPlayer.reset()
 //                startAndPause.setText("Play")
-                startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_play_btn)
+                ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_play_btn)
             }
         }
     }
@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity() {
         animator.end()
 //        progressSeekBar.progress = 0
 //        startAndPause.text = "Play"
-        startAndPauseImageButton.setImageResource(R.drawable.ic_baseline_play_btn)
+        ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_play_btn)
     }
 
     private val recordListener = View.OnClickListener {

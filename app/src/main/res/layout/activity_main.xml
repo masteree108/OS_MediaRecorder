@@ -24,14 +24,15 @@
         android:id="@+id/connectStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="32dp"
         android:fontFamily="@font/raleway_semibold"
-        android:text="連線狀態："
+        android:text="@string/connect_status"
         android:textAllCaps="false"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
-        app:layout_constraintStart_toStartOf="@+id/textInfo"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+         />
 
     <TextView
         android:id="@+id/textView"
@@ -82,14 +83,14 @@
         android:textColor="@color/mainBackground"
         app:layout_constraintEnd_toEndOf="@+id/ImageButtonChoose"
         app:layout_constraintHorizontal_bias="0.485"
-        app:layout_constraintStart_toStartOf="@+id/startAndPauseImageButton"
-        app:layout_constraintTop_toBottomOf="@+id/ImageButtonstop" />
+        app:layout_constraintStart_toStartOf="@+id/ImageButtonStartAndPause"
+        app:layout_constraintTop_toBottomOf="@+id/ImageButtonStop" />
 
     <TextView
         android:id="@+id/textInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
         android:fontFamily="@font/raleway_semibold"
         android:text="@string/get_response"
         android:textAllCaps="false"
@@ -97,16 +98,15 @@
         android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/connectStatus" />
 
 
     <ToggleButton
-        android:id="@+id/toggleButtonRecord"
+        android:id="@+id/ToggleButtonRecord"
         android:layout_width="44dp"
         android:layout_height="46dp"
         android:layout_marginTop="64dp"
-        android:background="@drawable/record_boutton"
-
+        android:background="@drawable/record_button"
         android:checked="false"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
@@ -115,7 +115,7 @@
         android:textOn=""
         app:layout_constraintEnd_toStartOf="@+id/ImageButtonChoose"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/ImageButtonstop"
+        app:layout_constraintStart_toEndOf="@+id/ImageButtonStop"
         app:layout_constraintTop_toBottomOf="@+id/seekBar"
         tools:ignore="MissingConstraints" />
 
@@ -125,28 +125,28 @@
         android:layout_height="46dp"
         android:layout_marginTop="64dp"
         android:background="@drawable/round_button_bg_white"
-        android:contentDescription="TODO"
+        android:contentDescription="@string/contentDescription_Choose"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         android:textColor="@color/mainBackground"
         app:layout_constraintEnd_toEndOf="@+id/seekBar"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/toggleButtonRecord"
+        app:layout_constraintStart_toEndOf="@+id/ToggleButtonRecord"
         app:layout_constraintTop_toBottomOf="@+id/seekBar"
         app:srcCompat="@drawable/ic_baseline_folder_btn"
         tools:ignore="MissingConstraints" />
 
     <ImageButton
-        android:id="@+id/startAndPauseImageButton"
+        android:id="@+id/ImageButtonStartAndPause"
         android:layout_width="46dp"
         android:layout_height="46dp"
         android:layout_marginTop="64dp"
         android:background="@drawable/round_button_bg"
-        android:contentDescription="TODO"
+        android:contentDescription="@string/contentDescription_StartAndPause"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         android:textColor="@color/mainBackground"
-        app:layout_constraintEnd_toStartOf="@+id/ImageButtonstop"
+        app:layout_constraintEnd_toStartOf="@+id/ImageButtonStop"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="@+id/seekBar"
@@ -155,7 +155,7 @@
         tools:ignore="MissingConstraints" />
 
     <ImageButton
-        android:id="@+id/ImageButtonstop"
+        android:id="@+id/ImageButtonStop"
         android:layout_width="45dp"
         android:layout_height="47dp"
         android:layout_marginTop="64dp"
@@ -163,11 +163,12 @@
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         android:textColor="@color/mainBackground"
-        app:layout_constraintEnd_toStartOf="@+id/toggleButtonRecord"
+        app:layout_constraintEnd_toStartOf="@+id/ToggleButtonRecord"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/startAndPauseImageButton"
+        app:layout_constraintStart_toEndOf="@+id/ImageButtonStartAndPause"
         app:layout_constraintTop_toBottomOf="@+id/seekBar"
         app:srcCompat="@drawable/ic_baseline_stop_btn"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints"
+        android:contentDescription="@string/contentDescription_Stop" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
