@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var chooseFileUri: Uri
     var chooseFilePosition: Int? = null
     val path_name = "/recAudio"
+    val use_newFile = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -282,10 +283,21 @@ class MainActivity : AppCompatActivity() {
 
     private val getListener = View.OnClickListener {
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
+        var postFile = ""
+        if(use_newFile) {
+            postFile = newFile.absolutePath
+        } else {
+            //post the file that user choosing
+            val adapter = Adapter(this, dataList)
+            if (chooseFilePosition != null)
+                postFile = dataList[chooseFilePosition!!].uri.toString()
+
+        }
+
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("input_data", "tttt.wav",
-                        File(newFile.absolutePath).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                        File(postFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
                 .build()
         val request = Request.Builder()
                 .header("accept", "application/json")
