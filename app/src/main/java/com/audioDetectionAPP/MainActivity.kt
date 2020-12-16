@@ -212,32 +212,34 @@ class MainActivity : AppCompatActivity() {
         it as ToggleButton
         Log.d("toggle", it.isChecked.toString())
         if (it.isChecked) {
-            oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.wav")
+            oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.pcm")
             mediaRecorder = MediaRecorder()
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            mediaRecorder.setAudioChannels(1);
-            mediaRecorder.setAudioEncodingBitRate(128000);
             mediaRecorder.setAudioSamplingRate(44100);
+            mediaRecorder.setAudioEncoder(AudioFormat.ENCODING_PCM_16BIT);
+            mediaRecorder.setAudioChannels(2);
+            mediaRecorder.setAudioEncodingBitRate(256000);
+
 
             mediaRecorder.setOutputFile(oriFile.absolutePath)
             mediaRecorder.prepare()
             mediaRecorder.start()
         } else {
-            mediaRecorder?.stop()
-            mediaRecorder?.reset()
-            mediaRecorder?.release()
+            mediaRecorder.stop()
+            mediaRecorder.reset()
+            mediaRecorder.release()
 //            mediaRecorder.stop()
 //            mediaRecorder.release()
-
+            val convert =PcmToWav()
             val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
             AlertDialog.Builder(this)
                     .setView(view)
                     .setTitle("命名錄音")
                     .setPositiveButton("OK") { dialog, which ->
-                        newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.wav")
+                        newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
                         oriFile.renameTo(newFile)
+                        convert.pcmToWav(newFile.toString(),newFile.toString().replace(".pcm",".wav"))
                     }
                     .setNegativeButton("cancel") { dialog, which ->
                         oriFile.delete()
@@ -283,6 +285,7 @@ class MainActivity : AppCompatActivity() {
 
     private val getListener = View.OnClickListener {
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
+
         var postFile = ""
         if(use_newFile) {
             postFile = newFile.absolutePath
@@ -293,11 +296,13 @@ class MainActivity : AppCompatActivity() {
                 postFile = dataList[chooseFilePosition!!].uri.toString()
 
         }
+        val wavFile =postFile.toString().replace("file://","")
 
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("input_data", "tttt.wav",
-                        File(postFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                        File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+
                 .build()
         val request = Request.Builder()
                 .header("accept", "application/json")
