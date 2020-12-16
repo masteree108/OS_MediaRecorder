@@ -27,10 +27,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.choosefile.view.*
 import kotlinx.android.synthetic.main.edit_name.view.*
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.IOException
 
@@ -60,6 +59,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun activityInit() {
         connect_to_server()
+
         mediaPlayer = MediaPlayer.create(this, R.raw.country_cue_1)
         animator = ObjectAnimator.ofFloat(imageView, "rotation", 0.0f, 360.0f)
         animator.duration = 2000
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         progressSeekBar.setOnSeekBarChangeListener(progressSeekBarListener)
         ToggleButtonRecord.setOnClickListener(recordListener)
         ImageButtonChoose.setOnClickListener(chooseListener)
-//        url_get.setOnClickListener(getListener)
+        url_get.setOnClickListener(getListener)
 //        startAndPause.setOnClickListener(playListener)
 //        ImageButtonRecord.setOnClickListener(recordListener)
 //        choose.setOnClickListener(chooseListener)
@@ -219,14 +219,17 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             mediaRecorder.setAudioChannels(1);
             mediaRecorder.setAudioEncodingBitRate(128000);
-            mediaRecorder.setAudioSamplingRate(48000);
+            mediaRecorder.setAudioSamplingRate(44100);
 
             mediaRecorder.setOutputFile(oriFile.absolutePath)
             mediaRecorder.prepare()
             mediaRecorder.start()
         } else {
-            mediaRecorder.stop()
-            mediaRecorder.release()
+            mediaRecorder?.stop()
+            mediaRecorder?.reset()
+            mediaRecorder?.release()
+//            mediaRecorder.stop()
+//            mediaRecorder.release()
 
             val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
             AlertDialog.Builder(this)
@@ -278,6 +281,42 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private val getListener = View.OnClickListener {
+//        textInfo.text="01.01"
+        val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
+        val path = file.path+file.name
+        val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("input_data", "tttt.wav",
+                        File("/storage/emulated/0/Android/data/com.audioDetectionAPP/files/Music/recAudio/123.wav").asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                .build()
+        val request = Request.Builder()
+                .header("accept", "application/json")
+                .addHeader("Content-Type","multipart/form-data")
+                .url("https://140.109.22.214:7777/api/nn/ctc_1")
+                .post(requestBody)
+                .build()
+
+//        client.newCall(request).execute().use { response ->
+//            if (!response.isSuccessful) throw IOException("Unexpected code $response")
+//            Log.d("res",response.toString())
+//        }
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread { textInfo.text = e.message }
+            }
+
+            @Throws(IOException::class)
+            override fun onResponse(call: Call, response: Response) {
+                val resStr = response.body?.string()
+                runOnUiThread { textInfo.text = resStr }
+            }
+        })
+    }
+
+
+
     private fun connect_to_server() {
         connectStatus.text = "連線狀態：連線中..."
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
@@ -312,8 +351,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
-        val p = "$DIRECTORY_MUSIC/" + path_name
+//        val p = "$DIRECTORY_MUSIC/" + path_name
         mr.setDataSource(file.path)
+        Log.d("test",file.name.toString())
         val duration = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
         val name = file.name
         val time: String = """ ${duration?.div(6000)}:${(duration?.rem(6000))?.div(1000)}"""
