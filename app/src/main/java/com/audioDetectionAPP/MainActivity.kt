@@ -41,8 +41,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var animator: ObjectAnimator
     lateinit var thread: Thread
     val handler = Handler()
-    lateinit var myUri: Uri
     lateinit var oriFile: File
+    lateinit var newFile: File
     val dataList = mutableListOf<Data>()
     lateinit var chooseFileUri: Uri
     var chooseFilePosition: Int? = null
@@ -212,7 +212,6 @@ class MainActivity : AppCompatActivity() {
         Log.d("toggle", it.isChecked.toString())
         if (it.isChecked) {
             oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.wav")
-            myUri = FileProvider.getUriForFile(this, "day19", oriFile)
             mediaRecorder = MediaRecorder()
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
@@ -236,7 +235,7 @@ class MainActivity : AppCompatActivity() {
                     .setView(view)
                     .setTitle("命名錄音")
                     .setPositiveButton("OK") { dialog, which ->
-                        val newFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.wav")
+                        newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.wav")
                         oriFile.renameTo(newFile)
                     }
                     .setNegativeButton("cancel") { dialog, which ->
@@ -282,14 +281,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val getListener = View.OnClickListener {
-//        textInfo.text="01.01"
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
-        val path = file.path+file.name
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("input_data", "tttt.wav",
-                        File("/storage/emulated/0/Android/data/com.audioDetectionAPP/files/Music/recAudio/123.wav").asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                        File(newFile.absolutePath).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
                 .build()
         val request = Request.Builder()
                 .header("accept", "application/json")
