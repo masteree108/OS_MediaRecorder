@@ -216,10 +216,10 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder = MediaRecorder()
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
             mediaRecorder.setOutputFormat(AudioFormat.ENCODING_PCM_16BIT);
-            mediaRecorder.setAudioSamplingRate(44100);
-            mediaRecorder.setAudioEncoder(AudioFormat.ENCODING_PCM_16BIT);
-            mediaRecorder.setAudioChannels(2);
-            mediaRecorder.setAudioEncodingBitRate(256000);
+            mediaRecorder.setAudioSamplingRate(16000);
+            mediaRecorder.setAudioEncoder(2);
+            mediaRecorder.setAudioChannels(1);
+            mediaRecorder.setAudioEncodingBitRate(16000*4*2);
 
 
             mediaRecorder.setOutputFile(oriFile.absolutePath)
@@ -231,7 +231,6 @@ class MainActivity : AppCompatActivity() {
             mediaRecorder.release()
 //            mediaRecorder.stop()
 //            mediaRecorder.release()
-            val convert =PcmToWav()
             val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
             AlertDialog.Builder(this)
                     .setView(view)
@@ -239,7 +238,6 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("OK") { dialog, which ->
                         newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
                         oriFile.renameTo(newFile)
-                        convert.pcmToWav(newFile.toString(),newFile.toString().replace(".pcm",".wav"))
                     }
                     .setNegativeButton("cancel") { dialog, which ->
                         oriFile.delete()
