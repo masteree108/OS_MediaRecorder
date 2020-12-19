@@ -80,11 +80,6 @@ class MainActivity : AppCompatActivity() {
         ToggleButtonRecord.setOnClickListener(recordListener)
         ImageButtonChoose.setOnClickListener(chooseListener)
         url_get.setOnClickListener(getListener)
-//        startAndPause.setOnClickListener(playListener)
-//        ImageButtonRecord.setOnClickListener(recordListener)
-//        choose.setOnClickListener(chooseListener)
-//        record.setOnClickListener(recordListener)
-
         setThread()
         getPermission()
         addDirectory()
@@ -92,7 +87,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addDirectory() {
-        val file = File(DIRECTORY_MUSIC, path_name)
+        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
         if (!file.exists()) {
             file.mkdir()
             println(file.absolutePath + path_name + " is not exists")
