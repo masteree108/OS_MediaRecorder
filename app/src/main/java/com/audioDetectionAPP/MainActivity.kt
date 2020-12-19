@@ -27,10 +27,7 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
-import java.util.concurrent.atomic.AtomicBoolean
 
 
 @TargetApi(Build.VERSION_CODES.N)
@@ -40,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var animator: ObjectAnimator
     private var isRecording: Boolean = false
     lateinit var thread: Thread
+    lateinit var t:Thread
+    lateinit var recordT: RecordThread
     private var sampleRate: Int= 16000
     private var channel:Int = AudioFormat.CHANNEL_IN_MONO
     private var encodingType: Int=AudioFormat.ENCODING_PCM_16BIT
@@ -222,45 +221,10 @@ class MainActivity : AppCompatActivity() {
 
         if (it.isChecked) {
             oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.pcm")
-            audioRecorder = AudioRecord(MediaRecorder.AudioSource.MIC,sampleRate,channel,encodingType,bufferSizeInByte)
-
-            audioRecorder.startRecording()
-
-
-            val data = ByteArray(bufferSizeInByte)
-//            val os: FileOutputStream? = null
-            isRecording=true
-            Thread(Runnable {
-
-                val os =  FileOutputStream(oriFile);
-                if (null != os) {
-                    while (isRecording) {
-                        val read = audioRecorder.read(data, 0, bufferSizeInByte);
-                        if (AudioRecord.ERROR_INVALID_OPERATION != read) {
-                            try {
-                                Log.d("writedata", data.toString())
-                                os.write(data);
-                            } catch (e: IOException) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    try {
-                        Log.i("out", "run: close file output stream !");
-                        os.close();
-
-                    } catch (e: IOException) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start()
-
-
+            recordT = RecordThread(MediaRecorder.AudioSource.MIC,sampleRate,channel,encodingType,oriFile)
+            recordT.start()
         } else {
-            audioRecorder.release()
-//            audioRecorder.stop()
-
-            isRecording=false
+            recordT.stopRecord()
 
             val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
             val conv = PcmToWav()
