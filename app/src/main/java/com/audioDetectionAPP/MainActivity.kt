@@ -296,8 +296,8 @@ class MainActivity : AppCompatActivity() {
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("input_data", "tttt.wav",
-                        File("/storage/emulated/0/Android/data/com.audioDetectionAPP/files/Music/recAudio/123.wav").asRequestBody("audio/x-wav".toMediaTypeOrNull()))
-
+//                        File("/storage/emulated/0/Android/data/com.audioDetectionAPP/files/Music/recAudio/123.wav").asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                          File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
                 .build()
         val request = Request.Builder()
                 .header("accept", "application/json")
@@ -345,17 +345,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareFile() {
-//        val oriUri = Uri.parse("android.resource://com.example.fish.day19_littlebirdsoundmediaplayermediarecorder/raw/country_cue_1.mp3")
-//        val initFile = File(oriUri.path)
         val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
         Log.d("path", file.toString()) /*可以看logcat*/
         val fileList = file.listFiles()
         val mr = MediaMetadataRetriever()
-
+        // to avoid to deal with *.pcm file
         for (element in fileList) {
-            dataList.add(getFileInfor(mr, element))
+            if( File(element.toString()).extension =="wav") {
+                dataList.add(getFileInfor(mr, element))
+            }
         }
-//        dataList.add(getFileInfor(mr, initFile))
     }
 
     private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
