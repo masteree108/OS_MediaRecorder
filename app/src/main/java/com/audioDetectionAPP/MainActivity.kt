@@ -33,17 +33,17 @@ import java.io.IOException
 @TargetApi(Build.VERSION_CODES.N)
 class MainActivity : AppCompatActivity() {
     lateinit var mediaPlayer: MediaPlayer
-    lateinit var mediaRecorder: MediaRecorder
+//    lateinit var mediaRecorder: MediaRecorder
     lateinit var animator: ObjectAnimator
-    private var isRecording: Boolean = false
+//    private var isRecording: Boolean = false
     lateinit var thread: Thread
-    lateinit var t:Thread
+//    lateinit var t:Thread
     lateinit var recordT: RecordThread
     private var sampleRate: Int= 16000
-    private var channel:Int = AudioFormat.CHANNEL_IN_MONO
+    private var channel:Int = 1
     private var encodingType: Int=AudioFormat.ENCODING_PCM_16BIT
-    private var bufferSizeInByte = AudioRecord.getMinBufferSize(sampleRate, channel, encodingType)
-    lateinit var audioRecorder:AudioRecord
+//    private var bufferSizeInByte = AudioRecord.getMinBufferSize(sampleRate, channel, encodingType)
+//    lateinit var audioRecorder:AudioRecord
     val handler = Handler()
     lateinit var oriFile: File
     lateinit var newFile: File
@@ -57,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         activityInit()
 
 //        val  sd=Environment.getExternalStorageDirectory();
@@ -91,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addDirectory() {
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
+        val file = File(DIRECTORY_MUSIC, path_name)
         if (!file.exists()) {
             file.mkdir()
             println(file.absolutePath + path_name + " is not exists")

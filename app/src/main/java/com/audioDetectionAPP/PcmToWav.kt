@@ -2,21 +2,18 @@ package com.audioDetectionAPP
 
 import android.media.AudioFormat
 import android.media.AudioRecord
-import android.media.MediaRecorder
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 
 class PcmToWav {
 
-    private var mBufferSize : Int //快取的音訊大小
-    private var mSampleRate = 16000// 8000|16000
-    private var mChannel =  AudioFormat.CHANNEL_IN_MONO //立體聲
+    private var mSampleRate = 16000 // 8000|16000
+    private var mChannel =  1//立體聲
     private var mEncoding = AudioFormat.ENCODING_PCM_16BIT
+    private var mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, mChannel, mEncoding) //快取的音訊大小
 
-    constructor() {
-        mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, mChannel, mEncoding)
-    }
+
 
     /**
      * @param sampleRate sample rate、取樣率
@@ -38,18 +35,22 @@ class PcmToWav {
         val totalAudioLen: Long
         val totalDataLen: Long
         val longSampleRate = mSampleRate.toLong()
-        val channels = 2
-        val byteRate = (16 * mSampleRate * channels / 8).toLong()
+        val channels = 1
+        val byteRate = 16 * longSampleRate * channels / 8
         val data = ByteArray(mBufferSize)
         try {
             `in` = FileInputStream(inFilename)
             out = FileOutputStream(outFilename)
-            totalAudioLen = `in`.channel.size()
+
+            totalAudioLen = `in`.channel.size() - 44
             totalDataLen = totalAudioLen + 36
+
+
             writeWaveFileHeader(out, totalAudioLen, totalDataLen,
                     longSampleRate, channels, byteRate)
             while (`in`.read(data) != -1) {
                 out.write(data)
+                out.flush()
             }
             `in`.close()
             out.close()
@@ -87,7 +88,7 @@ class PcmToWav {
         header[19] = 0
         header[20] = 1 // format = 1
         header[21] = 0
-        header[22] = channels.toByte()
+        header[22] = channels.toByte() //channel
         header[23] = 0
         header[24] = (longSampleRate and 0xff).toByte()
         header[25] = (longSampleRate shr 8 and 0xff).toByte()

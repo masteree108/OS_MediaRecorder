@@ -6,22 +6,22 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-class RecordThread(audio_src:Int,sample_rate:Int,channel_mask:Int,encoding_Type:Int,path: File)  : Thread(){
-    private var bufferSizeInByte = AudioRecord.getMinBufferSize(sample_rate, channel_mask, encoding_Type)
-    private var audioRecorder = AudioRecord(audio_src,sample_rate,channel_mask,encoding_Type, this.bufferSizeInByte)
+class RecordThread(audio_src:Int,sample_rate:Int,channel_mask:Int,encoding_type:Int,path: File)  : Thread(){
+    private var bufferSizeInByte = AudioRecord.getMinBufferSize(sample_rate, channel_mask, encoding_type)
+    private var audioRecorder = AudioRecord(audio_src,sample_rate,channel_mask,encoding_type, bufferSizeInByte)
     private var outputPath =  FileOutputStream(path);
     private var isRecording = true
-    private var  recordBuffer = ByteArray(this.bufferSizeInByte)
+    private var  recordBuffer = ByteArray(bufferSizeInByte)
 
     override fun run() {
-        this.audioRecorder.startRecording()
+        audioRecorder.startRecording()
 
         while (this.isRecording) {
-            val read = this.audioRecorder.read(this.recordBuffer, 0, this.bufferSizeInByte);
+            val read = audioRecorder.read(recordBuffer, 0, this.bufferSizeInByte);
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                 try {
-                    Log.d("Write_Data", recordBuffer.toString())
-                    this.outputPath.write(this.recordBuffer);
+//                    Log.d("Write_Data", recordBuffer.toString())
+                    outputPath.write(recordBuffer);
                 } catch (e: IOException) {
                     e.printStackTrace();
                 }
