@@ -9,7 +9,7 @@ import java.io.IOException
 class PcmToWav {
 
     private var mSampleRate = 16000 // 8000|16000
-    private var mChannel =  1//立體聲
+    private var mChannel =  AudioFormat.CHANNEL_IN_MONO//立體聲
     private var mEncoding = AudioFormat.ENCODING_PCM_16BIT
     private var mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, mChannel, mEncoding) //快取的音訊大小
 
@@ -35,7 +35,7 @@ class PcmToWav {
         val totalAudioLen: Long
         val totalDataLen: Long
         val longSampleRate = mSampleRate.toLong()
-        val channels = 1
+        val channels = if (mChannel==AudioFormat.CHANNEL_IN_MONO) 1 else 2
         val byteRate = 16 * longSampleRate * channels / 8
         val data = ByteArray(mBufferSize)
         try {

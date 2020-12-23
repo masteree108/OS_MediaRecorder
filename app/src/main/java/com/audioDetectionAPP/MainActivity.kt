@@ -6,10 +6,8 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.*
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
+import android.os.*
 import android.os.Environment.DIRECTORY_MUSIC
-import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -33,17 +31,13 @@ import java.io.IOException
 @TargetApi(Build.VERSION_CODES.N)
 class MainActivity : AppCompatActivity() {
     lateinit var mediaPlayer: MediaPlayer
-//    lateinit var mediaRecorder: MediaRecorder
     lateinit var animator: ObjectAnimator
-//    private var isRecording: Boolean = false
     lateinit var thread: Thread
-//    lateinit var t:Thread
     lateinit var recordT: RecordThread
     private var sampleRate: Int= 16000
-    private var channel:Int = 1
+    private var channel:Int = AudioFormat.CHANNEL_IN_MONO
     private var encodingType: Int=AudioFormat.ENCODING_PCM_16BIT
-//    private var bufferSizeInByte = AudioRecord.getMinBufferSize(sampleRate, channel, encodingType)
-//    lateinit var audioRecorder:AudioRecord
+
     val handler = Handler()
     lateinit var oriFile: File
     lateinit var newFile: File
@@ -57,11 +51,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         activityInit()
 
-//        val  sd=Environment.getExternalStorageDirectory();
-//        val path=sd.getPath()+ path_name
 
     }
 
@@ -83,6 +74,7 @@ class MainActivity : AppCompatActivity() {
         setThread()
         getPermission()
         addDirectory()
+
 
     }
 
@@ -217,7 +209,14 @@ class MainActivity : AppCompatActivity() {
 
         if (it.isChecked) {
             oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.pcm")
-            recordT = RecordThread(MediaRecorder.AudioSource.MIC,sampleRate,channel,encodingType,oriFile)
+            val recordHand = object : Handler(Looper.getMainLooper()) {
+                override fun handleMessage(msg: Message) {
+                    val bundle = msg.data
+                    val rms= bundle.getString("rms")
+                    textInfo.text= rms
+                }
+            }
+            recordT = RecordThread(MediaRecorder.AudioSource.MIC, sampleRate, channel, encodingType, oriFile,recordHand)
             recordT.start()
         } else {
             recordT.stopRecord()
@@ -282,7 +281,6 @@ class MainActivity : AppCompatActivity() {
             postFile = newFile.absolutePath
         } else {
             //post the file that user choosing
-            val adapter = Adapter(this, dataList)
             if (chooseFilePosition != null)
                 postFile = dataList[chooseFilePosition!!].uri.toString()
 
@@ -293,7 +291,7 @@ class MainActivity : AppCompatActivity() {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("input_data", "tttt.wav",
 //                        File("/storage/emulated/0/Android/data/com.audioDetectionAPP/files/Music/recAudio/123.wav").asRequestBody("audio/x-wav".toMediaTypeOrNull()))
-                          File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                        File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
                 .build()
         val request = Request.Builder()
                 .header("accept", "application/json")
