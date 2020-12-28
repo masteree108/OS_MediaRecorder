@@ -105,23 +105,34 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPermission() {
         if (ActivityCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
+                this,
+                android.Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE), 0)
+            ActivityCompat.requestPermissions(
+                this, arrayOf(
+                    android.Manifest.permission.RECORD_AUDIO,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE ,
+                    android.Manifest.permission.BLUETOOTH
+                ), 0
+            )
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         when (requestCode) {
             0 -> {
                 if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     AlertDialog.Builder(this)
-                            .setTitle("提醒")
-                            .setMessage("無提供麥克風權限將無法使用錄音功能")
-                            .create()
-                            .show()
+                        .setTitle("提醒")
+                        .setMessage("無提供麥克風權限將無法使用錄音功能")
+                        .create()
+                        .show()
                 }
             }
         }
@@ -212,32 +223,38 @@ class MainActivity : AppCompatActivity() {
             val recordHand = object : Handler(Looper.getMainLooper()) {
                 override fun handleMessage(msg: Message) {
                     val bundle = msg.data
-                    val rms= bundle.getString("rms")
-                    textInfo.text= rms
+                    val res= bundle.getString("res")
+                    textInfo.text= res
                 }
             }
-            recordT = RecordThread(MediaRecorder.AudioSource.MIC, sampleRate, channel, encodingType, oriFile,recordHand)
+            recordT = RecordThread(
+                MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                sampleRate,
+                channel,
+                encodingType,
+                oriFile,
+                recordHand
+            )
             recordT.start()
         } else {
             recordT.stopRecord()
 
-            val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
-            val conv = PcmToWav()
-            AlertDialog.Builder(this)
-                    .setView(view)
-                    .setTitle("命名錄音")
-                    .setPositiveButton("OK") { dialog, which ->
-                        newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
-                        oriFile.renameTo(newFile)
-                        conv.pcmToWav(newFile.toString(), newFile.toString().replace(".pcm", ".wav"));
-                    }
-                    .setNegativeButton("cancel") { dialog, which ->
-                        oriFile.delete()
-                    }
-                    .create()
-                    .show()
+//            val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
+//            val conv = PcmToWav()
+//            AlertDialog.Builder(this)
+//                    .setView(view)
+//                    .setTitle("命名錄音")
+//                    .setPositiveButton("OK") { dialog, which ->
+//                        newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
+//                        oriFile.renameTo(newFile)
+////                        conv.pcmToWav(newFile.toString(), newFile.toString().replace(".pcm", ".wav"));
+//                    }
+//                    .setNegativeButton("cancel") { dialog, which ->
+//                        oriFile.delete()
+//                    }
+//                    .create()
+//                    .show()
         }
-//
     }
 
     private val chooseListener = View.OnClickListener {
@@ -249,7 +266,12 @@ class MainActivity : AppCompatActivity() {
         val adapter = Adapter(this, dataList)
         adapter.setOnItemClick(object : Adapter.OnItemClickListener {
             override fun onClick(position: Int) {
-                if (chooseFilePosition != null) dataList[chooseFilePosition!!].color = Color.argb(0, 0, 0, 0)
+                if (chooseFilePosition != null) dataList[chooseFilePosition!!].color = Color.argb(
+                    0,
+                    0,
+                    0,
+                    0
+                )
                 chooseFilePosition = position
                 dataList[chooseFilePosition!!].color = Color.rgb(194, 194, 194)
             }
@@ -273,6 +295,8 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+
     private val getListener = View.OnClickListener {
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
 
@@ -289,9 +313,10 @@ class MainActivity : AppCompatActivity() {
 
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
-                .addFormDataPart("input_data", "tttt.wav",
-//                        File("/storage/emulated/0/Android/data/com.audioDetectionAPP/files/Music/recAudio/123.wav").asRequestBody("audio/x-wav".toMediaTypeOrNull()))
-                        File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull()))
+                .addFormDataPart(
+                    "input_data", "tttt.wav",
+                    File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
+                )
                 .build()
         val request = Request.Builder()
                 .header("accept", "application/json")
@@ -316,6 +341,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
 
 
 
@@ -370,3 +396,4 @@ class MainActivity : AppCompatActivity() {
 
 
 }
+

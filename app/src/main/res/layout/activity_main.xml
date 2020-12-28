@@ -31,8 +31,7 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-         />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView"
@@ -73,7 +72,8 @@
         android:id="@+id/url_get"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/btn_bg"
         android:fontFamily="@font/raleway_semibold"
         android:paddingStart="32dp"
@@ -81,10 +81,12 @@
         android:text="@string/get"
         android:textAllCaps="false"
         android:textColor="@color/mainBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/ImageButtonChoose"
         app:layout_constraintHorizontal_bias="0.485"
         app:layout_constraintStart_toStartOf="@+id/ImageButtonStartAndPause"
-        app:layout_constraintTop_toBottomOf="@+id/ImageButtonStop" />
+        app:layout_constraintTop_toBottomOf="@+id/ImageButtonStop"
+        app:layout_constraintVertical_bias="0.19999999" />
 
     <TextView
         android:id="@+id/textInfo"
@@ -95,7 +97,7 @@
         android:text="@string/get_response"
         android:textAllCaps="false"
         android:textColor="@color/textAlt"
-        android:textSize="32sp"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/connectStatus" />
@@ -105,7 +107,7 @@
         android:id="@+id/ToggleButtonRecord"
         android:layout_width="44dp"
         android:layout_height="46dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/record_button"
         android:checked="false"
         android:paddingStart="32dp"
@@ -123,7 +125,7 @@
         android:id="@+id/ImageButtonChoose"
         android:layout_width="45dp"
         android:layout_height="46dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/round_button_bg_white"
         android:contentDescription="@string/contentDescription_Choose"
         android:paddingStart="32dp"
@@ -140,7 +142,7 @@
         android:id="@+id/ImageButtonStartAndPause"
         android:layout_width="46dp"
         android:layout_height="46dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/round_button_bg"
         android:contentDescription="@string/contentDescription_StartAndPause"
         android:paddingStart="32dp"
@@ -158,8 +160,9 @@
         android:id="@+id/ImageButtonStop"
         android:layout_width="45dp"
         android:layout_height="47dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/round_button_bg"
+        android:contentDescription="@string/contentDescription_Stop"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         android:textColor="@color/mainBackground"
@@ -168,7 +171,12 @@
         app:layout_constraintStart_toEndOf="@+id/ImageButtonStartAndPause"
         app:layout_constraintTop_toBottomOf="@+id/seekBar"
         app:srcCompat="@drawable/ic_baseline_stop_btn"
-        tools:ignore="MissingConstraints"
-        android:contentDescription="@string/contentDescription_Stop" />
+        tools:ignore="MissingConstraints" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="ImageButtonStartAndPause,ImageButtonStop,ImageButtonChoose,ToggleButtonRecord" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
