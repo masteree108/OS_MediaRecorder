@@ -2,8 +2,6 @@ package com.audioDetectionAPP
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
-import android.content.Context
-import android.media.AudioManager
 import android.media.AudioRecord
 import android.os.Bundle
 import android.os.Handler
@@ -21,24 +19,24 @@ import kotlin.math.sqrt
 
 
 class RecordThread(
-    audio_src: Int,
-    sample_rate: Int,
-    channel_mask: Int,
-    encoding_type: Int,
-    path: File,
-    h: Handler
+        audio_src: Int,
+        sample_rate: Int,
+        channel_mask: Int,
+        encoding_type: Int,
+        path: File,
+        h: Handler
 )  : Thread(){
     private var bufferSizeInByte = AudioRecord.getMinBufferSize(
-        sample_rate,
-        channel_mask,
-        encoding_type
+            sample_rate,
+            channel_mask,
+            encoding_type
     )
-    private var audioRecorder = AudioRecord(
-        audio_src,
-        sample_rate,
-        channel_mask,
-        encoding_type,
-        bufferSizeInByte
+    private  var audioRecorder = AudioRecord(
+            audio_src,
+            sample_rate,
+            channel_mask,
+            encoding_type,
+            bufferSizeInByte
     )
     private var FilePath =path.toString()
     private var WavFilePath=FilePath.replace(".pcm", ".wav")
@@ -49,26 +47,17 @@ class RecordThread(
     private var hand = h
     private var convert = PcmToWav()
 
-//    fun isBluetoothHeadsetConnected(): Boolean {
-//        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-//        val isConnected = (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled
-//                && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
-//        Log.i("bluetoothConnected", isConnected.toString() + "")
-//        return isConnected
-//    }
+
 
 
 
     override fun run() {
         audioRecorder.startRecording()
-//        isBluetoothHeadsetConnected()
-
-
         while (this.isRecording) {
             val read = audioRecorder.read(recordBuffer, 0, bufferSizeInByte);
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                 ByteBuffer.wrap(recordBuffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(
-                    shorts
+                        shorts
                 );
 
                 try {
@@ -135,8 +124,8 @@ class RecordThread(
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart(
-                "input_data", "data.wav",
-                File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
+                    "input_data", "data.wav",
+                    File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
             )
             .build()
         val request = Request.Builder()
@@ -166,7 +155,10 @@ class RecordThread(
     }
 
 
+    fun isBluetoothHeadsetConnected(): Boolean {
+        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled
+                && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
+    }
 }
-
-
 

@@ -2,6 +2,9 @@ package com.audioDetectionAPP
 
 import android.animation.ObjectAnimator
 import android.annotation.TargetApi
+
+import android.content.Context
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.*
@@ -13,6 +16,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.SeekBar
+import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +24,6 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.choosefile.view.*
-import kotlinx.android.synthetic.main.edit_name.view.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -34,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var animator: ObjectAnimator
     lateinit var thread: Thread
     lateinit var recordT: RecordThread
+    lateinit var BLEReceiver:BluetoothReceiver
+    lateinit var am : AudioManager
     private var sampleRate: Int= 16000
     private var channel:Int = AudioFormat.CHANNEL_IN_MONO
     private var encodingType: Int=AudioFormat.ENCODING_PCM_16BIT
@@ -51,6 +56,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
         activityInit()
 
 
@@ -105,34 +112,34 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPermission() {
         if (ActivityCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
+                        this,
+                        android.Manifest.permission.RECORD_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this, arrayOf(
+                    this, arrayOf(
                     android.Manifest.permission.RECORD_AUDIO,
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE ,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
                     android.Manifest.permission.BLUETOOTH
-                ), 0
+            ), 0
             )
         }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray
     ) {
         when (requestCode) {
             0 -> {
                 if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     AlertDialog.Builder(this)
-                        .setTitle("提醒")
-                        .setMessage("無提供麥克風權限將無法使用錄音功能")
-                        .create()
-                        .show()
+                            .setTitle("提醒")
+                            .setMessage("無提供麥克風權限將無法使用錄音功能")
+                            .create()
+                            .show()
                 }
             }
         }
@@ -218,6 +225,7 @@ class MainActivity : AppCompatActivity() {
         it as ToggleButton
 //        Log.d("toggle", it.isChecked.toString())
 
+
         if (it.isChecked) {
             oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.pcm")
             val recordHand = object : Handler(Looper.getMainLooper()) {
@@ -227,16 +235,38 @@ class MainActivity : AppCompatActivity() {
                     textInfo.text= res
                 }
             }
+            am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             recordT = RecordThread(
-                MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                sampleRate,
-                channel,
-                encodingType,
-                oriFile,
-                recordHand
+                    MediaRecorder.AudioSource.MIC,
+                    sampleRate,
+                    channel,
+                    encodingType,
+                    oriFile,
+                    recordHand
             )
+            //確認是否有連上藍牙耳麥
+            if (recordT.isBluetoothHeadsetConnected()){
+                BLEReceiver=BluetoothReceiver()
+                registerReceiver(BLEReceiver, IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED))
+                Log.d("BluetoothReceiver", "starting bluetooth")
+                am.startBluetoothSco()
+            }else{
+                Toast.makeText(this, "沒有使用藍牙耳麥錄音", Toast.LENGTH_LONG).show()
+            }
+
             recordT.start()
+
+
+
+
         } else {
+            Log.d("recordT.isBluetoothHeadsetConnected()",recordT.isBluetoothHeadsetConnected().toString())
+            //確認是否有連上藍牙耳麥
+            if (recordT.isBluetoothHeadsetConnected()){
+                am.stopBluetoothSco()
+                Log.d("BluetoothReceiver", "stop")
+                unregisterReceiver(BLEReceiver)
+            }
             recordT.stopRecord()
 
 //            val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
@@ -267,10 +297,10 @@ class MainActivity : AppCompatActivity() {
         adapter.setOnItemClick(object : Adapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 if (chooseFilePosition != null) dataList[chooseFilePosition!!].color = Color.argb(
-                    0,
-                    0,
-                    0,
-                    0
+                        0,
+                        0,
+                        0,
+                        0
                 )
                 chooseFilePosition = position
                 dataList[chooseFilePosition!!].color = Color.rgb(194, 194, 194)
@@ -314,8 +344,8 @@ class MainActivity : AppCompatActivity() {
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(
-                    "input_data", "tttt.wav",
-                    File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
+                        "input_data", "tttt.wav",
+                        File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
                 )
                 .build()
         val request = Request.Builder()
