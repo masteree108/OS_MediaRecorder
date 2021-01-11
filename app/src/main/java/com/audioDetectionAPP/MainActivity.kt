@@ -10,7 +10,7 @@ import android.graphics.Color
 import android.media.*
 import android.net.Uri
 import android.os.*
-import android.os.Environment.DIRECTORY_MUSIC
+import android.os.Environment.*
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.choosefile.view.*
+import kotlinx.android.synthetic.main.edit_name.view.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     val dataList = mutableListOf<Data>()
     lateinit var chooseFileUri: Uri
     var chooseFilePosition: Int? = null
+    var audio_path_name="/sdcard/Music"
     val path_name = "/recAudio"
     val use_newFile = false
 
@@ -56,8 +58,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-
         activityInit()
 
 
@@ -73,7 +73,6 @@ class MainActivity : AppCompatActivity() {
         mediaPlayerAndProgressUpdate()
         ImageButtonStartAndPause.setOnClickListener(playListener)
         ImageButtonStop.setOnClickListener(playListener)
-        seekBar.setOnSeekBarChangeListener(seekBarListener)
         progressSeekBar.setOnSeekBarChangeListener(progressSeekBarListener)
         ToggleButtonRecord.setOnClickListener(recordListener)
         ImageButtonChoose.setOnClickListener(chooseListener)
@@ -81,17 +80,15 @@ class MainActivity : AppCompatActivity() {
         setThread()
         getPermission()
         addDirectory()
-
-
     }
 
     private fun addDirectory() {
         val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
         if (!file.exists()) {
             file.mkdir()
-            println(file.absolutePath + path_name + " is not exists")
+            println(file.absolutePath  + " is not exists")
         } else {
-            println(file.absolutePath + path_name + " existed")
+            println(file.absolutePath  + " existed")
         }
     }
 
@@ -150,7 +147,6 @@ class MainActivity : AppCompatActivity() {
         when (it) {
             ImageButtonStartAndPause -> {
                 if (mediaPlayer.isPlaying) {
-//                    startAndPause.text = "Play"
                     ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_play_btn)
                     animator.pause()
                     mediaPlayer.pause()
@@ -160,10 +156,7 @@ class MainActivity : AppCompatActivity() {
                     else {
                         animator.repeatCount = -1
                         animator.start()
-//                        println("aaaaaa $animator")
-
                     }
-//                    startAndPause.text = "Pause"
                     ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_pause_btn)
                     mediaPlayer.start()
                     handler.postDelayed(thread, 200)
@@ -176,25 +169,12 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer.stop()
                 mediaPlayer.prepare()
                 progressSeekBar.progress = 0
-//                mediaPlayer.reset()
-//                startAndPause.setText("Play")
                 ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_play_btn)
             }
         }
     }
 
-    private val seekBarListener = object : SeekBar.OnSeekBarChangeListener {
-        override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            mediaPlayer.setVolume(progress / 100f, progress / 100f)
-            textView.text = "Volume : $progress %"
-        }
 
-        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-        }
-
-        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-        }
-    }
 
     private val progressSeekBarListener = object : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -216,16 +196,14 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer.stop()
         mediaPlayer.prepare()
         animator.end()
-//        progressSeekBar.progress = 0
-//        startAndPause.text = "Play"
+
         ImageButtonStartAndPause.setImageResource(R.drawable.ic_baseline_play_btn)
     }
 
     private val recordListener = View.OnClickListener {
         it as ToggleButton
-//        Log.d("toggle", it.isChecked.toString())
 
-
+        var TAG="Record"
         if (it.isChecked) {
             oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.pcm")
             val recordHand = object : Handler(Looper.getMainLooper()) {
@@ -236,6 +214,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+//            am.setStreamVolume(MediaRecorder.AudioSource.MIC,50,0)
             recordT = RecordThread(
                     MediaRecorder.AudioSource.MIC,
                     sampleRate,
@@ -246,44 +225,27 @@ class MainActivity : AppCompatActivity() {
             )
             //確認是否有連上藍牙耳麥
             if (recordT.isBluetoothHeadsetConnected()){
+                TAG+="/BluetoothReceiver"
                 BLEReceiver=BluetoothReceiver()
                 registerReceiver(BLEReceiver, IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED))
-                Log.d("BluetoothReceiver", "starting bluetooth")
+                Log.d(TAG, "Start")
+                am.setStreamVolume(MediaRecorder.AudioSource.VOICE_COMMUNICATION,50,0)
                 am.startBluetoothSco()
             }else{
                 Toast.makeText(this, "沒有使用藍牙耳麥錄音", Toast.LENGTH_LONG).show()
             }
-
             recordT.start()
 
-
-
-
-        } else {
-            Log.d("recordT.isBluetoothHeadsetConnected()",recordT.isBluetoothHeadsetConnected().toString())
-            //確認是否有連上藍牙耳麥
+        } else { //確認是否有連上藍牙耳麥
             if (recordT.isBluetoothHeadsetConnected()){
+                TAG+="/BluetoothReceiver"
                 am.stopBluetoothSco()
-                Log.d("BluetoothReceiver", "stop")
+                Log.d(TAG, "Stop")
                 unregisterReceiver(BLEReceiver)
             }
             recordT.stopRecord()
-
-//            val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
-//            val conv = PcmToWav()
-//            AlertDialog.Builder(this)
-//                    .setView(view)
-//                    .setTitle("命名錄音")
-//                    .setPositiveButton("OK") { dialog, which ->
-//                        newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
-//                        oriFile.renameTo(newFile)
-////                        conv.pcmToWav(newFile.toString(), newFile.toString().replace(".pcm", ".wav"));
-//                    }
-//                    .setNegativeButton("cancel") { dialog, which ->
-//                        oriFile.delete()
-//                    }
-//                    .create()
-//                    .show()
+            Log.d(TAG,"Stop Record")
+//            reNameAudioFile()
         }
     }
 
@@ -388,7 +350,6 @@ class MainActivity : AppCompatActivity() {
 
             @Throws(IOException::class)
             override fun onResponse(call: Call, response: Response) {
-                val resStr = response.body?.string()
                 runOnUiThread { connectStatus.text = "連線狀態：連線成功" }
             }
         })
@@ -396,7 +357,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun prepareFile() {
         val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
-        Log.d("path", file.toString()) /*可以看logcat*/
         val fileList = file.listFiles()
         val mr = MediaMetadataRetriever()
         // to avoid to deal with *.pcm file
@@ -409,9 +369,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getFileInfor(mr: MediaMetadataRetriever, file: File): Data {
 //        val p = "$DIRECTORY_MUSIC/" + path_name
-        Log.d("getinfo", file.path)
         mr.setDataSource(file.path)
-        Log.d("test", file.name.toString())
         val duration = mr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong()
         val name = file.name
         val time: String = """ ${duration?.div(6000)}:${(duration?.rem(6000))?.div(1000)}"""
@@ -422,6 +380,22 @@ class MainActivity : AppCompatActivity() {
         mediaPlayer.release()
         mediaPlayer = MediaPlayer.create(this, uri)
         mediaPlayerAndProgressUpdate()
+    }
+
+    private fun reNameAudioFile(){
+        val view = LayoutInflater.from(this).inflate(R.layout.edit_name, null)
+        AlertDialog.Builder(this)
+                .setView(view)
+                .setTitle("命名錄音")
+                .setPositiveButton("OK") { dialog, which ->
+                    newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
+                    oriFile.renameTo(newFile)
+                }
+                .setNegativeButton("cancel") { dialog, which ->
+                    oriFile.delete()
+                }
+                .create()
+                .show()
     }
 
 
