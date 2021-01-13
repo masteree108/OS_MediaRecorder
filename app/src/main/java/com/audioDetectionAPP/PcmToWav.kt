@@ -1,7 +1,12 @@
 package com.audioDetectionAPP
 
+import android.content.ContentValues
+import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
+import android.os.Build
+import android.provider.MediaStore
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -9,7 +14,7 @@ import java.io.IOException
 class PcmToWav {
 
     private var mSampleRate = 16000 // 8000|16000
-    private var mChannel =  AudioFormat.CHANNEL_IN_MONO//立體聲
+    private var mChannel =  AudioFormat.CHANNEL_IN_MONO//單聲道
     private var mEncoding = AudioFormat.ENCODING_PCM_16BIT
     private var mBufferSize = AudioRecord.getMinBufferSize(mSampleRate, mChannel, mEncoding) //快取的音訊大小
 
@@ -29,7 +34,7 @@ class PcmToWav {
      * @param outFilename 目標檔案路徑
      */
 
-    fun pcmToWav(inFilename: String?, outFilename: String?) {
+    fun pcmToWav(context:Context ,inFilename: String?, outFilename: String?,audioFileName:String?) {
         val `in`: FileInputStream
         val out: FileOutputStream
         val totalAudioLen: Long
@@ -40,7 +45,18 @@ class PcmToWav {
         val data = ByteArray(mBufferSize)
         try {
             `in` = FileInputStream(inFilename)
-            out = FileOutputStream(outFilename)
+            out = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val values = ContentValues(4)
+                values.put(MediaStore.Audio.Media.DISPLAY_NAME, audioFileName)
+                values.put(MediaStore.Audio.Media.DATE_ADDED, (System.currentTimeMillis() / 1000).toInt())
+                values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
+                values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
+                val audiouri = context.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values)
+                val temp=context.getContentResolver().openFileDescriptor(audiouri!!,"w")
+                FileOutputStream(temp?.getFileDescriptor())
+            }else {
+                FileOutputStream(outFilename)
+            }
 
             totalAudioLen = `in`.channel.size() - 44
             totalDataLen = totalAudioLen + 36
@@ -49,11 +65,11 @@ class PcmToWav {
             writeWaveFileHeader(out, totalAudioLen, totalDataLen,
                     longSampleRate, channels, byteRate)
             while (`in`.read(data) != -1) {
-                out.write(data)
-                out.flush()
+                out?.write(data)
+                out?.flush()
             }
-            `in`.close()
-            out.close()
+            `in`?.close()
+            out?.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -110,6 +126,6 @@ class PcmToWav {
         header[41] = (totalAudioLen shr 8 and 0xff).toByte()
         header[42] = (totalAudioLen shr 16 and 0xff).toByte()
         header[43] = (totalAudioLen shr 24 and 0xff).toByte()
-        out.write(header, 0, 44)
+        out?.write(header, 0, 44)
     }
 }

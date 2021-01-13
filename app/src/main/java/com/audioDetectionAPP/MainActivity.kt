@@ -2,7 +2,7 @@ package com.audioDetectionAPP
 
 import android.animation.ObjectAnimator
 import android.annotation.TargetApi
-
+import android.content.ContentValues
 import android.content.Context
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -11,6 +11,7 @@ import android.media.*
 import android.net.Uri
 import android.os.*
 import android.os.Environment.*
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +30,7 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 
 
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var animator: ObjectAnimator
     lateinit var thread: Thread
     lateinit var recordT: RecordThread
+    lateinit var context:Context
     lateinit var BLEReceiver:BluetoothReceiver
     lateinit var am : AudioManager
     private var sampleRate: Int= 16000
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var chooseFileUri: Uri
     var chooseFilePosition: Int? = null
     var audio_path_name="/sdcard/Music"
-    val path_name = "/recAudio"
+    val path_name = "recAudio"
     val use_newFile = false
 
 
@@ -80,16 +83,27 @@ class MainActivity : AppCompatActivity() {
         setThread()
         getPermission()
         addDirectory()
+
     }
 
     private fun addDirectory() {
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
-        if (!file.exists()) {
-            file.mkdir()
-            println(file.absolutePath  + " is not exists")
-        } else {
-            println(file.absolutePath  + " existed")
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            val file = File(audio_path_name, path_name)
+            if (!file.exists()) {
+                file.mkdir()
+                println(file.absolutePath + " is not exists")
+            } else {
+                println(file.absolutePath + " existed")
+            }
+        }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val file = File(getExternalCacheDir(),"")
+            if (!file.exists()) {
+                Log.d(file.absolutePath, " is not exists")
+            } else {
+                Log.d(file.absolutePath, " existed")
+            }
         }
+
     }
 
     private fun mediaPlayerAndProgressUpdate() {
@@ -109,34 +123,34 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPermission() {
         if (ActivityCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
+                this,
+                android.Manifest.permission.RECORD_AUDIO
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                    this, arrayOf(
+                this, arrayOf(
                     android.Manifest.permission.RECORD_AUDIO,
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     android.Manifest.permission.READ_EXTERNAL_STORAGE,
                     android.Manifest.permission.BLUETOOTH
-            ), 0
+                ), 0
             )
         }
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         when (requestCode) {
             0 -> {
                 if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                     AlertDialog.Builder(this)
-                            .setTitle("提醒")
-                            .setMessage("無提供麥克風權限將無法使用錄音功能")
-                            .create()
-                            .show()
+                        .setTitle("提醒")
+                        .setMessage("無提供麥克風權限將無法使用錄音功能")
+                        .create()
+                        .show()
                 }
             }
         }
@@ -205,7 +219,16 @@ class MainActivity : AppCompatActivity() {
 
         var TAG="Record"
         if (it.isChecked) {
-            oriFile = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/new.pcm")
+            var audioFileName="rec-${System.currentTimeMillis() / 1000}"
+            var audioFilenameExtension=".pcm"
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                oriFile=File(audio_path_name, path_name + File.separator +audioFileName+audioFilenameExtension)
+            }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                oriFile=File(getExternalCacheDir(),  audioFileName+audioFilenameExtension)
+            }
+
+            context = this as Context
+
             val recordHand = object : Handler(Looper.getMainLooper()) {
                 override fun handleMessage(msg: Message) {
                     val bundle = msg.data
@@ -213,23 +236,29 @@ class MainActivity : AppCompatActivity() {
                     textInfo.text= res
                 }
             }
+
             am = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 //            am.setStreamVolume(MediaRecorder.AudioSource.MIC,50,0)
             recordT = RecordThread(
-                    MediaRecorder.AudioSource.MIC,
-                    sampleRate,
-                    channel,
-                    encodingType,
-                    oriFile,
-                    recordHand
+                MediaRecorder.AudioSource.MIC,
+                sampleRate,
+                channel,
+                encodingType,
+                audioFileName,
+                oriFile,
+                recordHand,
+                context
             )
             //確認是否有連上藍牙耳麥
             if (recordT.isBluetoothHeadsetConnected()){
                 TAG+="/BluetoothReceiver"
                 BLEReceiver=BluetoothReceiver()
-                registerReceiver(BLEReceiver, IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED))
+                registerReceiver(
+                    BLEReceiver,
+                    IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
+                )
                 Log.d(TAG, "Start")
-                am.setStreamVolume(MediaRecorder.AudioSource.VOICE_COMMUNICATION,50,0)
+                am.setStreamVolume(MediaRecorder.AudioSource.VOICE_COMMUNICATION, 50, 0)
                 am.startBluetoothSco()
             }else{
                 Toast.makeText(this, "沒有使用藍牙耳麥錄音", Toast.LENGTH_LONG).show()
@@ -244,7 +273,7 @@ class MainActivity : AppCompatActivity() {
                 unregisterReceiver(BLEReceiver)
             }
             recordT.stopRecord()
-            Log.d(TAG,"Stop Record")
+            Log.d(TAG, "Stop Record")
 //            reNameAudioFile()
         }
     }
@@ -259,10 +288,10 @@ class MainActivity : AppCompatActivity() {
         adapter.setOnItemClick(object : Adapter.OnItemClickListener {
             override fun onClick(position: Int) {
                 if (chooseFilePosition != null) dataList[chooseFilePosition!!].color = Color.argb(
-                        0,
-                        0,
-                        0,
-                        0
+                    0,
+                    0,
+                    0,
+                    0
                 )
                 chooseFilePosition = position
                 dataList[chooseFilePosition!!].color = Color.rgb(194, 194, 194)
@@ -306,8 +335,8 @@ class MainActivity : AppCompatActivity() {
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(
-                        "input_data", "tttt.wav",
-                        File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
+                    "input_data", "tttt.wav",
+                    File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
                 )
                 .build()
         val request = Request.Builder()
@@ -356,7 +385,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun prepareFile() {
-        val file = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name)
+
+        val file = if(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            File(audio_path_name, path_name)
+        }else{
+            File(getExternalCacheDir(),"")
+        }
         val fileList = file.listFiles()
         val mr = MediaMetadataRetriever()
         // to avoid to deal with *.pcm file
@@ -388,7 +422,10 @@ class MainActivity : AppCompatActivity() {
                 .setView(view)
                 .setTitle("命名錄音")
                 .setPositiveButton("OK") { dialog, which ->
-                    newFile  = File(getExternalFilesDir(DIRECTORY_MUSIC), path_name + "/${view.editText.text}.pcm")
+                    newFile  = File(
+                        getExternalFilesDir(DIRECTORY_MUSIC),
+                        path_name + "/${view.editText.text}.pcm"
+                    )
                     oriFile.renameTo(newFile)
                 }
                 .setNegativeButton("cancel") { dialog, which ->

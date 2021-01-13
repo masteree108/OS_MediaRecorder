@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import com.audioDetectionAPP.R
 
 import kotlinx.android.synthetic.main.file.view.*
+//import kotlinx.parcelize.Parceliz
+
 
 class Adapter(val context: Context, val list: List<Data>) : RecyclerView.Adapter<Adapter.ViewHolder>() {
 
