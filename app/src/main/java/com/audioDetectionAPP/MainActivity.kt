@@ -274,7 +274,6 @@ class MainActivity : AppCompatActivity() {
             }
             recordT.stopRecord()
             Log.d(TAG, "Stop Record")
-//            reNameAudioFile()
         }
     }
 

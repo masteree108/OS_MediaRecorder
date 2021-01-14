@@ -34,7 +34,7 @@ class PcmToWav {
      * @param outFilename 目標檔案路徑
      */
 
-    fun pcmToWav(context:Context ,inFilename: String?, outFilename: String?,audioFileName:String?) {
+    fun pcmToWav(inFilename: String?, outFilename: String?) {
         val `in`: FileInputStream
         val out: FileOutputStream
         val totalAudioLen: Long
@@ -45,18 +45,8 @@ class PcmToWav {
         val data = ByteArray(mBufferSize)
         try {
             `in` = FileInputStream(inFilename)
-            out = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val values = ContentValues(4)
-                values.put(MediaStore.Audio.Media.DISPLAY_NAME, audioFileName)
-                values.put(MediaStore.Audio.Media.DATE_ADDED, (System.currentTimeMillis() / 1000).toInt())
-                values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
-                values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
-                val audiouri = context.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values)
-                val temp=context.getContentResolver().openFileDescriptor(audiouri!!,"w")
-                FileOutputStream(temp?.getFileDescriptor())
-            }else {
-                FileOutputStream(outFilename)
-            }
+            out = FileOutputStream(outFilename)
+
 
             totalAudioLen = `in`.channel.size() - 44
             totalDataLen = totalAudioLen + 36

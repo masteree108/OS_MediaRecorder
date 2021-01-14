@@ -3,9 +3,11 @@ package com.audioDetectionAPP
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
 import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
 import android.media.AudioRecord
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
@@ -22,33 +24,33 @@ import java.nio.ByteOrder
 import java.util.concurrent.TimeUnit
 import kotlin.math.sqrt
 private data class Audio(val uri: Uri,
-                 val name: String,
+                         val name: String,
 )
 
 open class RecordThread(
-    audio_src: Int,
-    sample_rate: Int,
-    channel_mask: Int,
-    encoding_type: Int,
-    filename: String,
-    path: File,
-    h: Handler,
-    context: Context
+        audio_src: Int,
+        sample_rate: Int,
+        channel_mask: Int,
+        encoding_type: Int,
+        filename: String,
+        path: File,
+        h: Handler,
+        context: Context
 )  : Thread(){
     private var mSampleRate=sample_rate
     private var mChannelMask=channel_mask
     private var mEncodingType=encoding_type
     private var bufferSizeInByte = AudioRecord.getMinBufferSize(
-        mSampleRate,
-        mChannelMask,
-        mEncodingType
+            mSampleRate,
+            mChannelMask,
+            mEncodingType
     )
     private  var audioRecorder = AudioRecord(
-        audio_src,
-        mSampleRate,
-        mChannelMask,
-        mEncodingType,
-        bufferSizeInByte
+            audio_src,
+            mSampleRate,
+            mChannelMask,
+            mEncodingType,
+            bufferSizeInByte
     )
     private var C=context
     private var TAG ="Record_Thread"
@@ -61,7 +63,6 @@ open class RecordThread(
     private var hand = h
     private var convert = PcmToWav()
     private var outputPath =  FileOutputStream(path)
-
 //    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
 //        FileOutputStream(path)
 //    }else{ val values = ContentValues(4)
@@ -94,7 +95,7 @@ open class RecordThread(
             val read = audioRecorder.read(recordBuffer, 0, bufferSizeInByte);
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                 ByteBuffer.wrap(recordBuffer).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(
-                    shorts
+                        shorts
                 );
 
                 try {
@@ -111,6 +112,8 @@ open class RecordThread(
             TAG="Record_Thread/OUT"
             Log.i(TAG, "run: close file output stream !");
             this.outputPath?.close();
+            convert.pcmToWav(FilePath, WavFilePath)
+
 //            totalAudioLen = outputPath.channel.size() - 44
 //            totalDataLen = totalAudioLen + 36
 //            writeWaveFileHeader(outputPath, totalAudioLen, totalDataLen,
@@ -151,9 +154,20 @@ open class RecordThread(
         this.isRecording=false
         this.audioRecorder.stop()
         this.audioRecorder.release()
-        convert.pcmToWav(C, FilePath, WavFilePath, audioFileName)
+//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            val values = ContentValues(4)
+//            values.put(MediaStore.Audio.Media.DISPLAY_NAME, audioFileName)
+//            values.put(MediaStore.Audio.Media.DATE_ADDED, (System.currentTimeMillis() / 1000).toInt())
+//            values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
+//            values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
+//            val audiouri = C.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values)
+//            val temp=C.getContentResolver().openFileDescriptor(audiouri!!,"w")
+//            FileOutputStream(temp?.getFileDescriptor())
+//        }else {
+//            FileOutputStream(outFilename)
+//        }
         this.join()
-        getDetectionRES()
+//        getDetectionRES()
 //        queryAudioData()
 
         this.interrupt()
@@ -178,7 +192,8 @@ open class RecordThread(
         val wavFile =WavFilePath.replace("file://", "")
         val mes:Message = Message.obtain()
         val bundle = Bundle()
-        val gg=queryAudioData()
+//        val gg=queryAudioData()
+//        Log.d(TAG,gg.uri.path.toString())
 
 //        val temp=C.getContentResolver().openFile(gg[0].uri!!,"r",null)
 ////        Log.d(TAG,temp.fileDescriptor)
@@ -188,18 +203,18 @@ open class RecordThread(
 
 //        temp.asRequestBody()
         val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart(
-                "input_data", "data.wav",
-                File(gg[0].uri.path).asRequestBody("audio/x-wav".toMediaTypeOrNull())
-            )
-            .build()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(
+                        "input_data", "data.wav",
+                        File(WavFilePath).asRequestBody("audio/x-wav".toMediaTypeOrNull())
+                )
+                .build()
         val request = Request.Builder()
-            .header("accept", "application/json")
-            .addHeader("Content-Type", "multipart/form-data")
-            .url("https://140.109.22.214:7777/api/nn/ctc_1")
-            .post(requestBody)
-            .build()
+                .header("accept", "application/json")
+                .addHeader("Content-Type", "multipart/form-data")
+                .url("https://140.109.22.214:7777/api/nn/ctc_1")
+                .post(requestBody)
+                .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 bundle.putString("res", e.message)
@@ -224,27 +239,27 @@ open class RecordThread(
                 && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
     }
 
-    private fun queryAudioData(): MutableList<Audio> {
+    private fun queryAudioData(): Audio {
 
-        val audioList = mutableListOf<Audio>()
+        lateinit var audioInfo:Audio
 
         val projection = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.DISPLAY_NAME,
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DISPLAY_NAME,
         )
         val selection = "${MediaStore.Audio.Media.DISPLAY_NAME} = ?"
 
 
         val selectionArgs = arrayOf(
-            audioFileName+".wav"
+                audioFileName+".wav"
         )
         val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} ASC"
         val query = C.getContentResolver().query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
         )
         query?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
@@ -255,14 +270,15 @@ open class RecordThread(
                 Log.d("TEST",id.toString())
                 val name = cursor.getString(nameColumn)
                 val contentUri: Uri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    id
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        id
                 )
-                audioList += Audio(contentUri, name)
+                audioInfo=Audio(contentUri,name)
+
 
             }
         }
-        return audioList
+        return audioInfo
 
 
 //
@@ -290,7 +306,6 @@ open class RecordThread(
 //        }
     }
 }
-
 
 
 
