@@ -7,16 +7,18 @@ import android.content.ContentValues
 import android.content.Context
 import android.media.AudioRecord
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Message
+import android.os.*
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
+import android.view.LayoutInflater
+import androidx.appcompat.app.AlertDialog
+import kotlinx.android.synthetic.main.edit_name.view.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.sqrt
 private data class Audio(val uri: Uri,
                          val name: String,
+                         val id:Long
 )
 
 open class RecordThread(
@@ -55,6 +58,7 @@ open class RecordThread(
     private var C=context
     private var TAG ="Record_Thread"
     private var audioFileName=filename
+    private var oriFile=path
     private var FilePath =path.toString()
     private var WavFilePath=FilePath.replace(".pcm", ".wav")
     private var isRecording = true
@@ -63,34 +67,12 @@ open class RecordThread(
     private var hand = h
     private var convert = PcmToWav()
     private var outputPath =  FileOutputStream(path)
-//    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-//        FileOutputStream(path)
-//    }else{ val values = ContentValues(4)
-//        values.put(MediaStore.Audio.Media.DISPLAY_NAME, "WW")
-//        values.put(
-//            MediaStore.Audio.Media.DATE_ADDED,
-//            (System.currentTimeMillis() / 1000).toInt()
-//        )
-//        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
-//        values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
-//        val audiouri = context.getContentResolver().insert(
-//            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-//            values
-//        )
-//        val temp=context.getContentResolver().openFileDescriptor(audiouri!!,"w")
-//        FileOutputStream(temp?.getFileDescriptor())
-//    }
+
 
 
     override fun run() {
         audioRecorder.startRecording()
         TAG+="/RMS"
-//        val totalAudioLen: Long
-//        val totalDataLen: Long
-//        val longSampleRate = mSampleRate.toLong()
-//        val channels = if (mChannelMask== AudioFormat.CHANNEL_IN_MONO) 1 else 2
-//        val byteRate = 16 * longSampleRate * channels / 8
-//        val data = ByteArray(bufferSizeInByte)
         while (this.isRecording) {
             val read = audioRecorder.read(recordBuffer, 0, bufferSizeInByte);
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
@@ -113,37 +95,7 @@ open class RecordThread(
             Log.i(TAG, "run: close file output stream !");
             this.outputPath?.close();
             convert.pcmToWav(FilePath, WavFilePath)
-
-//            totalAudioLen = outputPath.channel.size() - 44
-//            totalDataLen = totalAudioLen + 36
-//            writeWaveFileHeader(outputPath, totalAudioLen, totalDataLen,
-//                longSampleRate, channels, byteRate)
-//            this.outputPath?.close();
-
-//            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//                val input = FileInputStream(WavFilePath)
-//                val data = ByteArray(bufferSizeInByte)
-//                val values = ContentValues(4)
-//                values.put(MediaStore.Audio.Media.DISPLAY_NAME, audioFileName)
-//                values.put(MediaStore.Audio.Media.DATE_ADDED, (System.currentTimeMillis() / 1000).toInt())
-//                values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
-//                values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
-//                val audiouri = C.getContentResolver().insert(
-//                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-//                    values
-//                )
-//                val temp=C.getContentResolver().openFileDescriptor(audiouri!!,"r")
-//                val output=File(temp)
-//                while (input?.read(data) != -1) {
-//                    output?.write(data)
-//                    output?.flush()
-//                }
-//                input?.close()
-//                output?.close()
-//            }
-//            queryAudioData()
-//            getDetectionRES()
-
+            getDetectionRES()
 
         } catch (e: IOException) {
             e.printStackTrace();
@@ -154,24 +106,9 @@ open class RecordThread(
         this.isRecording=false
         this.audioRecorder.stop()
         this.audioRecorder.release()
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            val values = ContentValues(4)
-//            values.put(MediaStore.Audio.Media.DISPLAY_NAME, audioFileName)
-//            values.put(MediaStore.Audio.Media.DATE_ADDED, (System.currentTimeMillis() / 1000).toInt())
-//            values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
-//            values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
-//            val audiouri = C.getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values)
-//            val temp=C.getContentResolver().openFileDescriptor(audiouri!!,"w")
-//            FileOutputStream(temp?.getFileDescriptor())
-//        }else {
-//            FileOutputStream(outFilename)
-//        }
         this.join()
-//        getDetectionRES()
-//        queryAudioData()
-
+        oriFile.delete()
         this.interrupt()
-
     }
 
     private fun calRMS(read: Int): Float {
@@ -187,26 +124,130 @@ open class RecordThread(
     }
 
 
+
+    fun isBluetoothHeadsetConnected(): Boolean {
+        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled
+                && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
+    }
+    fun CopytoMediaSharedStorage(){
+        val input = FileInputStream(WavFilePath)
+        val data = ByteArray(bufferSizeInByte)
+        val values = ContentValues(4)
+
+        values.put(MediaStore.Audio.Media.DISPLAY_NAME, audioFileName)
+        values.put(MediaStore.Audio.Media.DATE_ADDED, (System.currentTimeMillis() / 1000).toInt())
+        values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/x-wav")
+        values.put(MediaStore.Audio.Media.RELATIVE_PATH, "Music" + File.separator + "recAudio")
+        val audiouri = C.getContentResolver().insert(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            values
+        )
+        val output=C.getContentResolver().openOutputStream(audiouri!!,"w")
+
+        while (input?.read(data) != -1) {
+            output?.write(data)
+            output?.flush()
+        }
+        input?.close()
+        output?.close()
+    }
+
+   fun reNameAudioFile(){
+        val view = LayoutInflater.from(C).inflate(R.layout.edit_name, null)
+        AlertDialog.Builder(C)
+                .setView(view)
+                .setTitle("命名錄音")
+                .setPositiveButton("確認") { dialog, which ->
+                    val name ="${view.editText.text}"
+                    if (Build.VERSION.SDK_INT< Build.VERSION_CODES.Q) {
+                        val filename=WavFilePath.split(Regex("[^\\/*?\"<>|\\r\\n]+\$"))[0]
+                        val newFile  =File(
+                                filename,
+                                "/${name}.wav"
+
+                        )
+                        val old = File(WavFilePath)
+                        old.renameTo(newFile)
+                    }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val newFile  =File(
+                                C.getExternalCacheDir(),
+                                "/${name}.wav"
+                        )
+                        val old = File(WavFilePath)
+                        old.renameTo(newFile)
+
+                        reNameMediaSharedStorageAudioFile(name)
+                    }
+                }
+                .setNegativeButton("取消並刪除") { dialog, which ->
+
+                    File(WavFilePath).delete()
+
+                }
+                .create()
+                .show()
+    }
+
+    private  fun reNameMediaSharedStorageAudioFile(name:String){
+        val GG=queryAudioData()
+        val values = ContentValues(1)
+        values.put(MediaStore.Audio.Media.DISPLAY_NAME, name)
+        val audiouri=ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, GG.id)
+        C.getContentResolver().update(audiouri, values, null, null)
+    }
+
+
+    private fun queryAudioData(): Audio {
+        lateinit var audioInfo: Audio
+        val projection = arrayOf(
+                MediaStore.Audio.Media._ID,
+                MediaStore.Audio.Media.DISPLAY_NAME,
+        )
+        val selection = "${MediaStore.Audio.Media.DISPLAY_NAME} = ?"
+
+
+        val selectionArgs = arrayOf(
+                audioFileName + ".wav"
+        )
+        val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} ASC"
+        val query = C.getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                sortOrder
+        )
+        query?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                Log.d("TEST", id.toString())
+                val name = cursor.getString(nameColumn)
+                val contentUri: Uri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        id
+                )
+                audioInfo = Audio(contentUri, name,id)
+
+
+            }
+        }
+        return audioInfo
+    }
+
     private fun getDetectionRES(){
         val client = UnsafeHttpClient.getUnsafeOkHttpClient().build()
         val wavFile =WavFilePath.replace("file://", "")
-        val mes:Message = Message.obtain()
+        val mes = Message.obtain()
         val bundle = Bundle()
-//        val gg=queryAudioData()
-//        Log.d(TAG,gg.uri.path.toString())
-
-//        val temp=C.getContentResolver().openFile(gg[0].uri!!,"r",null)
-////        Log.d(TAG,temp.fileDescriptor)
-//        File(gg[0].uri.path)
-
-
-
-//        temp.asRequestBody()
         val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(
                         "input_data", "data.wav",
-                        File(WavFilePath).asRequestBody("audio/x-wav".toMediaTypeOrNull())
+                        File(wavFile).asRequestBody("audio/x-wav".toMediaTypeOrNull())
                 )
                 .build()
         val request = Request.Builder()
@@ -232,79 +273,6 @@ open class RecordThread(
         })
     }
 
-
-    fun isBluetoothHeadsetConnected(): Boolean {
-        val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled
-                && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED)
-    }
-
-    private fun queryAudioData(): Audio {
-
-        lateinit var audioInfo:Audio
-
-        val projection = arrayOf(
-                MediaStore.Audio.Media._ID,
-                MediaStore.Audio.Media.DISPLAY_NAME,
-        )
-        val selection = "${MediaStore.Audio.Media.DISPLAY_NAME} = ?"
-
-
-        val selectionArgs = arrayOf(
-                audioFileName+".wav"
-        )
-        val sortOrder = "${MediaStore.Audio.Media.DATE_ADDED} ASC"
-        val query = C.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder
-        )
-        query?.use { cursor ->
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
-            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                Log.d("TEST",id.toString())
-                val name = cursor.getString(nameColumn)
-                val contentUri: Uri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        id
-                )
-                audioInfo=Audio(contentUri,name)
-
-
-            }
-        }
-        return audioInfo
-
-
-//
-////        MediaStore.Audio.Media.getContentUri(MediaStore.Audio.Media.RELATIVE_PATH)
-//        val testgg = Uri.parse(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI + "/Music/recAudio/" )
-////        Log.d(TAG,testgg.toString())
-//
-//        var columns: Array<String?>? = arrayOf(MediaStore.Audio.Media.RELATIVE_PATH)
-//        val audioCursor=C.getContentResolver().query(
-//            testgg,
-//            columns,
-//            null,
-//            null,
-//            MediaStore.Audio.Media.DATE_ADDED + " DESC"
-//        )
-//        if (audioCursor != null ) {
-//            while (audioCursor.moveToNext()&&audioCursor.getCount()>0) {
-//                val bucketColumn: Int =
-//                    audioCursor.getColumnIndex(MediaStore.Audio.Media.RELATIVE_PATH)
-//
-//
-//                val bucket: String = audioCursor.getString(bucketColumn)
-//                Log.d(TAG,bucket)
-//            }
-//        }
-    }
 }
 
 

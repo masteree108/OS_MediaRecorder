@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var context:Context
     lateinit var BLEReceiver:BluetoothReceiver
     lateinit var am : AudioManager
+    private  lateinit var CacheAudioPath:String
     private var sampleRate: Int= 16000
     private var channel:Int = AudioFormat.CHANNEL_IN_MONO
     private var encodingType: Int=AudioFormat.ENCODING_PCM_16BIT
@@ -225,9 +226,11 @@ class MainActivity : AppCompatActivity() {
                 oriFile=File(audio_path_name, path_name + File.separator +audioFileName+audioFilenameExtension)
             }else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 oriFile=File(getExternalCacheDir(),  audioFileName+audioFilenameExtension)
+                CacheAudioPath=oriFile.toString().replace(".pcm",".wav")
+
             }
 
-            context = this as Context
+
 
             val recordHand = object : Handler(Looper.getMainLooper()) {
                 override fun handleMessage(msg: Message) {
@@ -247,7 +250,7 @@ class MainActivity : AppCompatActivity() {
                 audioFileName,
                 oriFile,
                 recordHand,
-                context
+                this
             )
             //確認是否有連上藍牙耳麥
             if (recordT.isBluetoothHeadsetConnected()){
@@ -272,7 +275,12 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "Stop")
                 unregisterReceiver(BLEReceiver)
             }
+
             recordT.stopRecord()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                recordT.CopytoMediaSharedStorage()
+            }
+            recordT.reNameAudioFile()
             Log.d(TAG, "Stop Record")
         }
     }
@@ -327,7 +335,6 @@ class MainActivity : AppCompatActivity() {
             //post the file that user choosing
             if (chooseFilePosition != null)
                 postFile = dataList[chooseFilePosition!!].uri.toString()
-
         }
         val wavFile =postFile.toString().replace("file://", "")
 
@@ -360,6 +367,7 @@ class MainActivity : AppCompatActivity() {
                 runOnUiThread { textInfo.text = resStr }
             }
         })
+
     }
 
 

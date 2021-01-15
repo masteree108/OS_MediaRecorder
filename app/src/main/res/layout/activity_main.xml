@@ -11,7 +11,7 @@
         android:id="@+id/url_get"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/btn_bg"
         android:fontFamily="@font/raleway_semibold"
         android:paddingStart="32dp"
@@ -20,7 +20,6 @@
         android:textAllCaps="false"
         android:textColor="@color/mainBackground"
         app:layout_constraintEnd_toEndOf="@+id/ImageButtonChoose"
-        app:layout_constraintHorizontal_bias="0.528"
         app:layout_constraintStart_toStartOf="@+id/ImageButtonStartAndPause"
         app:layout_constraintTop_toBottomOf="@+id/ToggleButtonRecord" />
 
